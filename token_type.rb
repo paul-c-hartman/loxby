@@ -23,7 +23,7 @@ class Lox::Token
 
     :eof
   ]
-  SingleTokens = Tokens.zip('()[],.-+;/*'.split('')).to_h
+  SingleTokens = Tokens.zip('(){},.-+;/*'.split('')).to_h
 
   attr_reader :type, :lexeme, :literal, :line
   def initialize(type, lexeme, literal, line)

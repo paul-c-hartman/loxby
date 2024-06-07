@@ -29,12 +29,27 @@ class Lox::Scanner
   def scan_token
     character = advance_character
 
-    single_token_types = Lox::Token::SingleTokens
-    single_token_types.delete :slash # Process this later
-    type = single_token_types[character]
-
-    if type
-      add_token single_token_types[character]
+    case character
+    when '('
+      add_token :left_paren
+    when ')'
+      add_token :right_paren
+    when '{'
+      add_token :left_brace
+    when '}'
+      add_token :right_brace
+    when ','
+      add_token :comma
+    when '.'
+      add_token :dot
+    when '-'
+      add_token :minus
+    when '+'
+      add_token :plus
+    when ';'
+      add_token :semicolon
+    when '*'
+      add_token :star
     else
       # Unknown character
       @interpreter.error(@line, "Unexpected character.")
