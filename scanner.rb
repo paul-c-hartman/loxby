@@ -30,6 +30,7 @@ class Lox::Scanner
     character = advance_character
 
     case character
+    # Single-character tokens
     when '('
       add_token :left_paren
     when ')'
@@ -50,6 +51,21 @@ class Lox::Scanner
       add_token :semicolon
     when '*'
       add_token :star
+    # 1-2 character tokens
+    when '!'
+      add_token match('=') ? :bang_equal : :bang
+    when '='
+      add_token match('=') ? :equal_equal : :equal
+    when '<'
+      add_token match('=') ? :less_equal : :less
+    when '>'
+      add_token match('=') ? :greater_equal : :greater
+    when '/'
+      # '/' is division, and '//' is comment. Needs special care.
+      if match('/') # comment line
+        advance_character until peek == "\n" || end_of_source?
+      else
+        add_token :slash
     else
       # Unknown character
       @interpreter.error(@line, "Unexpected character.")
@@ -64,5 +80,13 @@ class Lox::Scanner
   def add_token(type, literal = nil)
     text = @source[@start..@current]
     @tokens << Lox::Token.new(type, text, literal, @line)
+  end
+
+  # 1-character lookahead
+  def match(expected)
+    return false unless @source[@current] == expected || end_of_source?
+
+    @current += 1
+    true
   end
 end
