@@ -23,9 +23,29 @@ class Lox
   # Run interactively
   def run_prompt
     loop do
+      print "> "
       line = gets
       break unless line # Trap eof (Ctrl+D unix, Ctrl+Z win)
       run line
     end
+  end
+
+  # Run a string
+  def run(source)
+    tokens = Scanner.new(source).scan
+
+    # For now, just print tokens.
+    tokens.each { puts _1 }
+  end
+end
+
+class Lox::Scanner
+  def initialize(source)
+    @source = source
+  end
+
+  def scan
+    # For now, just return a list of characters.
+    @source.chars
   end
 end
