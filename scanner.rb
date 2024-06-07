@@ -2,6 +2,15 @@ require_relative 'loxby'
 require_relative 'token_type'
 
 class Lox::Scanner
+  EXPRESSIONS = {
+    whitespace: /\s/,
+    number_literal: /\d/,
+    identifier: /[a-zA-Z_]/
+  }
+  KEYWORDS = %w{and class else false for fun if nil or print return super this true var while}
+    .map { [_1, _1.to_sym] }
+    .to_h
+
   attr_accessor :line
   def initialize(source, interpreter)
     @source = source
@@ -59,24 +68,51 @@ class Lox::Scanner
     when '>'
       add_token match('=') ? :greater_equal : :greater
     when '/'
-      # '/' is division, and '//' is comment. Needs special care.
+      # '/' is division, '//' is comment, '/* ... */'
+      # is block comment. Needs special care.
       if match('/') # comment line
         advance_character until peek == "\n" || end_of_source?
+      elsif match('*') # block comment
+        scan_block_comment
       else
         add_token :slash
       end
     # Whitespace
     when "\n"
       @line += 1
-    when /\s/
+    when EXPRESSIONS[:whitespace]
       # Ignore
     # Literals
     when '"'
       scan_string
+    when EXPRESSIONS[:number_literal]
+      scan_number
+    # Keywords and identifiers
+    when EXPRESSIONS[:identifier]
+      scan_identifier
     else
       # Unknown character
       @interpreter.error(@line, "Unexpected character.")
     end
+  end
+
+  def scan_block_comment
+    advance_character until (peek == "*" && peek_next == "/") || (peek == "/" && peek_next == "*") || end_of_source?
+
+    if end_of_source? || peek_next == "\0"
+      @interpreter.error(line, "Unterminated block comment.")
+      return
+    elsif peek == "/" && peek_next == "*"
+      # Nested block comment. Skip opening characters
+      match "/"
+      match "*"
+      scan_block_comment # Skip nested comment
+      advance_character until (peek == "*" && peek_next == "/") || (peek == "/" && peek_next == "*") || end_of_source?
+    end
+
+    # Skip closing characters
+    match "*"
+    match "/"
   end
 
   def scan_string
@@ -96,6 +132,25 @@ class Lox::Scanner
     # Trim quotes around literal
     value = @source[(@start + 1)...(@current - 1)]
     add_token :string, value
+  end
+
+  def scan_number
+    advance_character while peek =~ EXPRESSIONS[:number_literal]
+
+    # Check for decimal
+    if peek == '.' && peek_next =~ EXPRESSIONS[:number_literal]
+      # Consume decimal point
+      advance_character
+      advance_character while peek =~ EXPRESSIONS[:number_literal]
+    end
+
+    add_token :number, @source[@start...@current].to_f
+  end
+
+  def scan_identifier
+    advance_character while peek =~ Regexp.union(EXPRESSIONS[:identifier], /\d/)
+    text = @source[@start...@current]
+    add_token(KEYWORDS[text] || :identifier)
   end
 
   def advance_character
@@ -121,5 +176,10 @@ class Lox::Scanner
   # 1-character lookahead
   def peek
     end_of_source? ? "\0" : @source[@current]
+  end
+
+  # 2-character lookahead
+  def peek_next
+    (@current + 1) > @source.size ? "\0" : @source[@current + 1]
   end
 end
