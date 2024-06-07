@@ -41,17 +41,6 @@ class Lox
   end
 end
 
-class Lox::Scanner
-  def initialize(source)
-    @source = source
-  end
-
-  def scan
-    # For now, just return a list of characters.
-    @source.chars
-  end
-end
-
 # Entry point for script. Print usage if
 # too many arguments, run script if script
 # file provided, run interactively if run
