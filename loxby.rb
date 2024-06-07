@@ -15,9 +15,14 @@ else
 end
 
 class Lox
+  def initialize
+    @errored = false
+  end
+
   # Run from file
   def run_file(path)
     run File.read(path)
+    exit(65) if @errored # Don't execute malformed code
   end
 
   # Run interactively
@@ -27,6 +32,7 @@ class Lox
       line = gets
       break unless line # Trap eof (Ctrl+D unix, Ctrl+Z win)
       run line
+      @errored = false # Reset so a mistake doesn't kill the repl
     end
   end
 
@@ -36,6 +42,15 @@ class Lox
 
     # For now, just print tokens.
     tokens.each { puts _1 }
+  end
+
+  def error(line, message)
+    report(line, "", message)
+  end
+
+  private def report(line, where, message)
+    $stderr.puts "[line #{line}] Error#{where}: #{message}"
+    @errored = true
   end
 end
 
