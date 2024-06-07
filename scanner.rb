@@ -66,27 +66,38 @@ class Lox::Scanner
         advance_character until peek == "\n" || end_of_source?
       else
         add_token :slash
+      end
+    # Whitespace
+    when "\n"
+      @line += 1
+    when /\s/
+      # Ignore
     else
       # Unknown character
       @interpreter.error(@line, "Unexpected character.")
     end
   end
 
-  def advance
+  def advance_character
+    character = @source[@current]
     @current += 1
-    @source[@current - 1]
+    character
   end
 
   def add_token(type, literal = nil)
-    text = @source[@start..@current]
+    text = @source[@start...@current]
     @tokens << Lox::Token.new(type, text, literal, @line)
   end
 
-  # 1-character lookahead
   def match(expected)
     return false unless @source[@current] == expected || end_of_source?
 
     @current += 1
     true
+  end
+
+  # 1-character lookahead
+  def peek
+    end_of_source? ? "\0" : @source[@current]
   end
 end

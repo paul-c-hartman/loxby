@@ -1,6 +1,4 @@
-#require_relative 'loxby'
-# I don't think this is actually required.
-# Language-specific implementation details.
+require_relative 'loxby'
 
 class Lox::Token
   Tokens = [

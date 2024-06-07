@@ -1,4 +1,5 @@
 # Lox interpreter in Ruby
+require_relative 'scanner'
 
 class Lox
   attr_reader :errored
@@ -25,7 +26,7 @@ class Lox
 
   # Run a string
   def run(source)
-    tokens = Scanner.new(source, self).scan
+    tokens = Scanner.new(source, self).scan_tokens
 
     # For now, just print tokens.
     tokens.each { puts _1 }
