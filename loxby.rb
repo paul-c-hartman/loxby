@@ -1,20 +1,7 @@
 # Lox interpreter in Ruby
 
-# Entry point for script. Print usage if
-# too many arguments, run script if script
-# file provided, run interactively if run
-# alone.
-INTERPRETER = Lox.new
-if ARGV.size > 1
-  puts "Usage: loxby.rb [script]"
-  exit 64
-elsif ARGV.size == 1
-  INTERPRETER.run_file ARGV[0]
-else
-  INTERPRETER.run_prompt
-end
-
 class Lox
+  attr_reader :errored
   def initialize
     @errored = false
   end
@@ -62,5 +49,21 @@ class Lox::Scanner
   def scan
     # For now, just return a list of characters.
     @source.chars
+  end
+end
+
+# Entry point for script. Print usage if
+# too many arguments, run script if script
+# file provided, run interactively if run
+# alone. Don't run if loaded with `require`.
+if __FILE__ == $PROGRAM_NAME
+  INTERPRETER = Lox.new
+  if ARGV.size > 1
+    puts "Usage: loxby.rb [script]"
+    exit 64
+  elsif ARGV.size == 1
+    INTERPRETER.run_file ARGV[0]
+  else
+    INTERPRETER.run_prompt
   end
 end
