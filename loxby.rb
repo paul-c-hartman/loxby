@@ -25,7 +25,7 @@ class Lox
 
   # Run a string
   def run(source)
-    tokens = Scanner.new(source).scan
+    tokens = Scanner.new(source, self).scan
 
     # For now, just print tokens.
     tokens.each { puts _1 }

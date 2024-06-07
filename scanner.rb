@@ -3,9 +3,10 @@ require_relative 'token_type'
 
 class Lox::Scanner
   attr_accessor :line
-  def initialize(source)
+  def initialize(source, interpreter)
     @source = source
     @tokens = []
+    @interpreter = interpreter
     # Variables for scanning
     @start = 0
     @current = 0
@@ -27,9 +28,17 @@ class Lox::Scanner
 
   def scan_token
     character = advance_character
+
     single_token_types = Lox::Token::SingleTokens
     single_token_types.delete :slash # Process this later
-    add_token single_token_types[character]
+    type = single_token_types[character]
+
+    if type
+      add_token single_token_types[character]
+    else
+      # Unknown character
+      @interpreter.error(@line, "Unexpected character.")
+    end
   end
 
   def advance
