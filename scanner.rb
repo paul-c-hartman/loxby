@@ -24,8 +24,6 @@ class Lox::Scanner
     @tokens << Lox::Token.new(:eof, "", nil, @line)
   end
 
-  def end_of_source? = @current >= @source.size
-
   def scan_token
     character = advance_character
 
@@ -72,10 +70,32 @@ class Lox::Scanner
       @line += 1
     when /\s/
       # Ignore
+    # Literals
+    when '"'
+      scan_string
     else
       # Unknown character
       @interpreter.error(@line, "Unexpected character.")
     end
+  end
+
+  def scan_string
+    until peek == '"' || end_of_source?
+      @line += 1 if peek == "\n"
+      advance_character
+    end
+
+    if end_of_source?
+      @interpreter.error(line, "Unterminated string.")
+      return
+    end
+
+    # Skip closing "
+    advance_character
+
+    # Trim quotes around literal
+    value = @source[(@start + 1)...(@current - 1)]
+    add_token :string, value
   end
 
   def advance_character
@@ -95,6 +115,8 @@ class Lox::Scanner
     @current += 1
     true
   end
+
+  def end_of_source? = @current >= @source.size
 
   # 1-character lookahead
   def peek
