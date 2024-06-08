@@ -1,185 +1,187 @@
 require_relative 'loxby'
 require_relative 'token_type'
 
-class Lox::Scanner
-  EXPRESSIONS = {
-    whitespace: /\s/,
-    number_literal: /\d/,
-    identifier: /[a-zA-Z_]/
-  }
-  KEYWORDS = %w{and class else false for fun if nil or print return super this true var while}
-    .map { [_1, _1.to_sym] }
-    .to_h
-
-  attr_accessor :line
-  def initialize(source, interpreter)
-    @source = source
-    @tokens = []
-    @interpreter = interpreter
-    # Variables for scanning
-    @start = 0
-    @current = 0
-    @line = 1
-  end
-
-  def scan_tokens
-    until end_of_source?
-      # Beginnning of next lexeme
-      @start = @current
-      scan_token
+class Lox
+  class Scanner
+    EXPRESSIONS = {
+      whitespace: /\s/,
+      number_literal: /\d/,
+      identifier: /[a-zA-Z_]/
+    }
+    KEYWORDS = %w{and class else false for fun if nil or print return super this true var while}
+      .map { [_1, _1.to_sym] }
+      .to_h
+  
+    attr_accessor :line
+    def initialize(source, interpreter)
+      @source = source
+      @tokens = []
+      @interpreter = interpreter
+      # Variables for scanning
+      @start = 0
+      @current = 0
+      @line = 1
     end
-
-    # Implicitly return @tokens
-    @tokens << Lox::Token.new(:eof, "", nil, @line)
-  end
-
-  def scan_token
-    character = advance_character
-
-    case character
-    # Single-character tokens
-    when '('
-      add_token :left_paren
-    when ')'
-      add_token :right_paren
-    when '{'
-      add_token :left_brace
-    when '}'
-      add_token :right_brace
-    when ','
-      add_token :comma
-    when '.'
-      add_token :dot
-    when '-'
-      add_token :minus
-    when '+'
-      add_token :plus
-    when ';'
-      add_token :semicolon
-    when '*'
-      add_token :star
-    # 1-2 character tokens
-    when '!'
-      add_token match('=') ? :bang_equal : :bang
-    when '='
-      add_token match('=') ? :equal_equal : :equal
-    when '<'
-      add_token match('=') ? :less_equal : :less
-    when '>'
-      add_token match('=') ? :greater_equal : :greater
-    when '/'
-      # '/' is division, '//' is comment, '/* ... */'
-      # is block comment. Needs special care.
-      if match('/') # comment line
-        advance_character until peek == "\n" || end_of_source?
-      elsif match('*') # block comment
-        scan_block_comment
-      else
-        add_token :slash
+  
+    def scan_tokens
+      until end_of_source?
+        # Beginnning of next lexeme
+        @start = @current
+        scan_token
       end
-    # Whitespace
-    when "\n"
-      @line += 1
-    when EXPRESSIONS[:whitespace]
-      # Ignore
-    # Literals
-    when '"'
-      scan_string
-    when EXPRESSIONS[:number_literal]
-      scan_number
-    # Keywords and identifiers
-    when EXPRESSIONS[:identifier]
-      scan_identifier
-    else
-      # Unknown character
-      @interpreter.error(@line, "Unexpected character.")
+  
+      # Implicitly return @tokens
+      @tokens << Lox::Token.new(:eof, "", nil, @line)
     end
-  end
-
-  def scan_block_comment
-    advance_character until (peek == "*" && peek_next == "/") || (peek == "/" && peek_next == "*") || end_of_source?
-
-    if end_of_source? || peek_next == "\0"
-      @interpreter.error(line, "Unterminated block comment.")
-      return
-    elsif peek == "/" && peek_next == "*"
-      # Nested block comment. Skip opening characters
-      match "/"
-      match "*"
-      scan_block_comment # Skip nested comment
+  
+    def scan_token
+      character = advance_character
+  
+      case character
+      # Single-character tokens
+      when '('
+        add_token :left_paren
+      when ')'
+        add_token :right_paren
+      when '{'
+        add_token :left_brace
+      when '}'
+        add_token :right_brace
+      when ','
+        add_token :comma
+      when '.'
+        add_token :dot
+      when '-'
+        add_token :minus
+      when '+'
+        add_token :plus
+      when ';'
+        add_token :semicolon
+      when '*'
+        add_token :star
+      # 1-2 character tokens
+      when '!'
+        add_token match('=') ? :bang_equal : :bang
+      when '='
+        add_token match('=') ? :equal_equal : :equal
+      when '<'
+        add_token match('=') ? :less_equal : :less
+      when '>'
+        add_token match('=') ? :greater_equal : :greater
+      when '/'
+        # '/' is division, '//' is comment, '/* ... */'
+        # is block comment. Needs special care.
+        if match('/') # comment line
+          advance_character until peek == "\n" || end_of_source?
+        elsif match('*') # block comment
+          scan_block_comment
+        else
+          add_token :slash
+        end
+      # Whitespace
+      when "\n"
+        @line += 1
+      when EXPRESSIONS[:whitespace]
+        # Ignore
+      # Literals
+      when '"'
+        scan_string
+      when EXPRESSIONS[:number_literal]
+        scan_number
+      # Keywords and identifiers
+      when EXPRESSIONS[:identifier]
+        scan_identifier
+      else
+        # Unknown character
+        @interpreter.error(@line, "Unexpected character.")
+      end
+    end
+  
+    def scan_block_comment
       advance_character until (peek == "*" && peek_next == "/") || (peek == "/" && peek_next == "*") || end_of_source?
+  
+      if end_of_source? || peek_next == "\0"
+        @interpreter.error(line, "Unterminated block comment.")
+        return
+      elsif peek == "/" && peek_next == "*"
+        # Nested block comment. Skip opening characters
+        match "/"
+        match "*"
+        scan_block_comment # Skip nested comment
+        advance_character until (peek == "*" && peek_next == "/") || (peek == "/" && peek_next == "*") || end_of_source?
+      end
+  
+      # Skip closing characters
+      match "*"
+      match "/"
     end
-
-    # Skip closing characters
-    match "*"
-    match "/"
-  end
-
-  def scan_string
-    until peek == '"' || end_of_source?
-      @line += 1 if peek == "\n"
+  
+    def scan_string
+      until peek == '"' || end_of_source?
+        @line += 1 if peek == "\n"
+        advance_character
+      end
+  
+      if end_of_source?
+        @interpreter.error(line, "Unterminated string.")
+        return
+      end
+  
+      # Skip closing "
       advance_character
+  
+      # Trim quotes around literal
+      value = @source[(@start + 1)...(@current - 1)]
+      add_token :string, value
     end
-
-    if end_of_source?
-      @interpreter.error(line, "Unterminated string.")
-      return
-    end
-
-    # Skip closing "
-    advance_character
-
-    # Trim quotes around literal
-    value = @source[(@start + 1)...(@current - 1)]
-    add_token :string, value
-  end
-
-  def scan_number
-    advance_character while peek =~ EXPRESSIONS[:number_literal]
-
-    # Check for decimal
-    if peek == '.' && peek_next =~ EXPRESSIONS[:number_literal]
-      # Consume decimal point
-      advance_character
+  
+    def scan_number
       advance_character while peek =~ EXPRESSIONS[:number_literal]
+  
+      # Check for decimal
+      if peek == '.' && peek_next =~ EXPRESSIONS[:number_literal]
+        # Consume decimal point
+        advance_character
+        advance_character while peek =~ EXPRESSIONS[:number_literal]
+      end
+  
+      add_token :number, @source[@start...@current].to_f
     end
-
-    add_token :number, @source[@start...@current].to_f
-  end
-
-  def scan_identifier
-    advance_character while peek =~ Regexp.union(EXPRESSIONS[:identifier], /\d/)
-    text = @source[@start...@current]
-    add_token(KEYWORDS[text] || :identifier)
-  end
-
-  def advance_character
-    character = @source[@current]
-    @current += 1
-    character
-  end
-
-  def add_token(type, literal = nil)
-    text = @source[@start...@current]
-    @tokens << Lox::Token.new(type, text, literal, @line)
-  end
-
-  def match(expected)
-    return false unless @source[@current] == expected || end_of_source?
-
-    @current += 1
-    true
-  end
-
-  def end_of_source? = @current >= @source.size
-
-  # 1-character lookahead
-  def peek
-    end_of_source? ? "\0" : @source[@current]
-  end
-
-  # 2-character lookahead
-  def peek_next
-    (@current + 1) > @source.size ? "\0" : @source[@current + 1]
+  
+    def scan_identifier
+      advance_character while peek =~ Regexp.union(EXPRESSIONS[:identifier], /\d/)
+      text = @source[@start...@current]
+      add_token(KEYWORDS[text] || :identifier)
+    end
+  
+    def advance_character
+      character = @source[@current]
+      @current += 1
+      character
+    end
+  
+    def add_token(type, literal = nil)
+      text = @source[@start...@current]
+      @tokens << Lox::Token.new(type, text, literal, @line)
+    end
+  
+    def match(expected)
+      return false unless @source[@current] == expected || end_of_source?
+  
+      @current += 1
+      true
+    end
+  
+    def end_of_source? = @current >= @source.size
+  
+    # 1-character lookahead
+    def peek
+      end_of_source? ? "\0" : @source[@current]
+    end
+  
+    # 2-character lookahead
+    def peek_next
+      (@current + 1) > @source.size ? "\0" : @source[@current + 1]
+    end
   end
 end
