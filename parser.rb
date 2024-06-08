@@ -13,9 +13,21 @@ class Lox
     end
 
     def parse
-      expression
+      expression_list
     rescue Lox::ParseError => e
       nil
+    end
+
+    def expression_list
+      expr = expression
+
+      while matches? :comma
+        operator = previous
+        right = expression
+        expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)
+      end
+      
+      expr
     end
 
     def expression
@@ -92,7 +104,7 @@ class Lox
       elsif matches? :number, :string
         Lox::AST::Expression::Literal.new(value: previous.literal)
       elsif matches? :left_paren
-        expr = expression
+        expr = expression_list
         consume :right_paren, "Expect ')' after expression."
         Lox::AST::Expression::Grouping.new(expression: expr)
       else
