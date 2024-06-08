@@ -7,14 +7,13 @@ class Interpreter < Visitor
     @process = process
   end
 
-  def interpret(expr)
-    value = evaluate expr
-    puts lox_obj_to_str(value)
+  def interpret(statements)
+    statements.each { lox_eval _1 }
   rescue Lox::RunError => e
     @process.runtime_error e
   end
 
-  def evaluate(expr)
+  def lox_eval(expr)
     expr.accept self
   end
 
@@ -41,6 +40,15 @@ class Interpreter < Visitor
     end
   end
 
+  def visit_expression_statement(statement)
+    lox_eval statement.expression
+  end
+
+  def visit_print_statement(statement)
+    value = lox_eval statement.expression
+    puts lox_obj_to_str(value)
+  end
+
   # Leaves of the AST. The scanner picks
   # out these values for us beforehand.
   def visit_literal_expression(expr)
@@ -48,11 +56,11 @@ class Interpreter < Visitor
   end
 
   def visit_grouping_expression(expr)
-    evaluate expr
+    lox_eval expr
   end
 
   def visit_unary_expression(expr)
-    right = evaluate(expr.right)
+    right = lox_eval(expr.right)
 
     case expr.operator.type
     when :minus
@@ -64,8 +72,8 @@ class Interpreter < Visitor
   end
 
   def visit_binary_expression(expr)
-    left = evaluate expr.left
-    right = evaluate expr.right
+    left = lox_eval expr.left
+    right = lox_eval expr.right
     case expr.operator.type
     when :minus
       ensure_number(expr.operator, left, right)
@@ -105,8 +113,8 @@ class Interpreter < Visitor
   end
 
   def visit_ternary_expression(expr)
-    left = evaluate expr.left
+    left = lox_eval expr.left
     
-    left ? evaluate(expr.center) : evaluate(expr.right)
+    left ? lox_eval(expr.center) : lox_eval(expr.right)
   end
 end

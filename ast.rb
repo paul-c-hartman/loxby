@@ -79,3 +79,11 @@ Lox::AST.define_ast(
     :unary => [[:token, :operator], [:expr, :right]]
   }
 )
+
+Lox::AST.define_ast(
+  :statement,
+  {
+    :expression => [[:expr, :expression]],
+    :print => [[:expr, :expression]]
+  }
+)

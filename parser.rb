@@ -13,9 +13,25 @@ class Lox
     end
 
     def parse
-      expression_list
-    rescue Lox::ParseError => e
-      nil
+      statements = []
+      statements << statement until end_of_input?
+      statements
+    end
+
+    def statement
+      matches?(:print) ? print_statement : expression_statement
+    end
+
+    def print_statement
+      value = expression_list
+      consume :semicolon, "Expect ';' after value."
+      Lox::AST::Statement::Print.new(expression: value)
+    end
+
+    def expression_statement
+      expr = expression_list
+      consume :semicolon, "Expect ';' after expression."
+      Lox::AST::Statement::Expression.new(expression: expr)
     end
 
     def expression_list

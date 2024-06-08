@@ -36,11 +36,10 @@ class Lox
   def run(source)
     tokens = Scanner.new(source, self).scan_tokens
     parser = Parser.new(tokens, self)
-    expression = parser.parse
+    statements = parser.parse
 
-    # We have a parser now! :)
     return if @errored
-    @interpreter.interpret expression
+    @interpreter.interpret statements
   end
 
   def error(line, message)
