@@ -42,3 +42,13 @@ class Lox
     end
   end
 end
+
+Lox::AST.define_ast(
+  "Expression",
+  {
+    :binary => [[:expr, :left], [:token, :operator], [:expr, :right]],
+    :grouping => [[:expr, :expression]],
+    :literal => [[:object, :value]],
+    :unary => [[:token, :operator], [:expr, :right]]
+  }
+)
