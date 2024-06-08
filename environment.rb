@@ -2,8 +2,13 @@ require_relative 'loxby'
 
 class Lox
   class Environment
-    def initialize
+    def initialize(enclosing = nil)
+      @enclosing = enclosing
       @values = {}
+    end
+
+    def undefined_variable
+      Lox::RunError.new(name, "Undefined variable '#{name.lexeme}'")
     end
 
     def []=(name, value)
@@ -13,8 +18,20 @@ class Lox
     def [](name)
       if @values.keys.member? name.lexeme
         @values[name.lexeme]
+      elsif @enclosing
+        @enclosing[name]
       else
-        raise Lox::RunError.new(name, "Undefined variable '#{name.lexeme}'")
+        raise undefined_variable
+      end
+    end
+
+    def assign(name, value)
+      if self[name]
+        self[name] = value
+      elsif @enclosing
+        @enclosing.assign(name, value)
+      else
+        raise undefined_variable
       end
     end
   end

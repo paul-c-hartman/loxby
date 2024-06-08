@@ -10,7 +10,9 @@ class Interpreter < Visitor
   end
 
   def interpret(statements)
-    statements.each { lox_eval _1 }
+    result = nil
+    statements.each { result = lox_eval(_1) }
+    result
   rescue Lox::RunError => e
     @process.runtime_error e
   end
@@ -58,6 +60,24 @@ class Interpreter < Visitor
 
   def visit_variable_expression(expr)
     @environment[expr.name]
+  end
+
+  def visit_assign_expression(expr)
+    value = evaluate expr.value
+    @environment.assign expr.name, value
+    value
+  end
+
+  def visit_block_statement(statement)
+    execute_block(statement.statements, Lox::Environment.new(@environment))
+  end
+
+  def execute_block(statements, environment)
+    previous = @environment
+    @environment = environment
+    statements.each { lox_eval _1 }
+  ensure
+    @environment = previous
   end
 
   # Leaves of the AST. The scanner picks

@@ -37,7 +37,20 @@ class Lox
     end
 
     def statement
-      matches?(:print) ? print_statement : expression_statement
+      if matches? :print
+        print_statement
+      elsif matches? :left_brace
+        Lox::AST::Statement::Block.new(statements: block)
+      else
+        expression_statement
+      end
+    end
+
+    def block
+      statements = []
+      statements << declaration until check(:right_brace) || end_of_input?
+      consume :right_brace, "Expect '}' after block."
+      statements
     end
 
     def print_statement
@@ -86,7 +99,25 @@ class Lox
     end
 
     def expression
-      equality
+      assignment
+    end
+
+    def assignment
+      expr = equality
+
+      if matches? :equal
+        equals = previous
+        value = assignment
+
+        if expr.is_a? Lox::AST::Expression::Variable
+          name = expr.name
+          return Lox::AST::Expression::Assign.new(name:, value:)
+        end
+
+        error equals, "Invalid assignment target."
+      end
+
+      expr
     end
 
     def equality
