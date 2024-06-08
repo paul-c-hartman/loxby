@@ -1,17 +1,17 @@
 require_relative 'loxby'
 
-# Interface:
-#   Lox::AST.define_ast(
-#     "ASTBaseClass",
-#     {
-#       :asttype => [[:field_one_type, :field_one_name], [:field_two_type, :field_two_name]],
-#       :otherasttype => [[:field_type, :field_name]]
-#     }
-#   )
-#
-# This defines Lox::AST::ASTBaseClass, which ::Asttype and ::Otherasttype descend from
-# and are scoped under.
 class Lox
+  # Interface:
+  #   Lox::AST.define_ast(
+  #     "ASTBaseClass",
+  #     {
+  #       :asttype => [[:field_one_type, :field_one_name], [:field_two_type, :field_two_name]],
+  #       :otherasttype => [[:field_type, :field_name]]
+  #     }
+  #   )
+  #
+  # This defines Lox::AST::ASTBaseClass, which ::Asttype and ::Otherasttype descend from
+  # and are scoped under.
   module AST
     module_function
 
