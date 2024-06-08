@@ -17,6 +17,10 @@ class ASTPrinter < Visitor
     parenthesize expr.operator.lexeme, expr.left, expr.right
   end
 
+  def visit_ternary_expression(expr)
+    parenthesize expr.left_operator.lexeme + expr.right_operator.lexeme, expr.left, expr.center, expr.right
+  end
+
   def visit_grouping_expression(expr)
     parenthesize "group", expr.expression
   end

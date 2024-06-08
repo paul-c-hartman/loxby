@@ -6,6 +6,7 @@ class Lox
       # Single-character tokens.
       :left_paren, :right_paren, :left_brace, :right_brace,
       :comma, :dot, :minus, :plus, :semicolon, :slash, :star,
+      :question, :colon,
 
       # 1-2 character tokens.
       :bang, :bang_equal,

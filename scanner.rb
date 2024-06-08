@@ -59,6 +59,10 @@ class Lox
         add_token :semicolon
       when '*'
         add_token :star
+      when '?'
+        add_token :question
+      when ':'
+        add_token :colon
       # 1-2 character tokens
       when '!'
         add_token match('=') ? :bang_equal : :bang

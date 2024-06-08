@@ -19,14 +19,30 @@ class Lox
     end
 
     def expression_list
-      expr = expression
+      expr = conditional
 
       while matches? :comma
         operator = previous
-        right = expression
+        right = conditional
         expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)
       end
       
+      expr
+    end
+
+    # Ternary operator
+    def conditional
+      expr = expression
+
+      if matches? :question
+        left_operator = previous
+        center = expression_list
+        consume :colon, "Expect ':' after '?' (ternary operator)."
+        right_operator = previous
+        right = conditional # Recurse, right-associative
+        expr = Lox::AST::Expression::Ternary.new(left: expr, left_operator:, center:, right_operator:, right:)
+      end
+
       expr
     end
 
