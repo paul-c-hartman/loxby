@@ -2,18 +2,23 @@
 require_relative 'scanner'
 require_relative 'token_type'
 require_relative 'parser'
+require_relative 'interpreter'
+require_relative 'errors'
 require_relative 'visitors/ast_printer'
 
 class Lox
-  attr_reader :errored
+  attr_reader :errored, :interpreter
   def initialize
     @errored = false
+    @errored_in_runtime = false
+    @interpreter = Interpreter.new(self) # Make static so REPL sessions reuse it
   end
 
   # Run from file
   def run_file(path)
     run File.read(path)
     exit(65) if @errored # Don't execute malformed code
+    exit(70) if @errored_in_runtime
   end
 
   # Run interactively
@@ -35,7 +40,7 @@ class Lox
 
     # We have a parser now! :)
     return if @errored
-    puts ASTPrinter.new.print(expression)
+    @interpreter.interpret expression
   end
 
   def error(line, message)
@@ -47,6 +52,12 @@ class Lox
       # Scan error
       report(line, "", message)
     end
+  end
+
+  def runtime_error(err)
+    $stderr.puts err.message
+    $stderr.puts "[line #{err.token.line}]"
+    @errored_in_runtime = true
   end
 
   private def report(line, where, message)
