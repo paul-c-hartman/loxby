@@ -1,5 +1,5 @@
 require_relative 'loxby'
-require_relative 'ast_visitors'
+require_relative 'visitors/base'
 
 class String
   def to_camel_case

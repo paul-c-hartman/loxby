@@ -1,4 +1,4 @@
-require_relative 'ast_visitors'
+require_relative 'base'
 
 class ASTPrinter < Visitor
   def print(expression)
