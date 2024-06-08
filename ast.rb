@@ -32,6 +32,7 @@ class Lox
     def define_ast(base_name, types)
       base_class = Class.new
       base_class.include Visitable
+      # Dynamically create subclasses for each AST type
       types.each do |class_name, fields|
         define_type(base_class, class_name, fields)
       end
@@ -42,13 +43,16 @@ class Lox
     def define_type(base_class, class_name, fields)
       subtype = Class.new(base_class)
       parameters = fields.map { _1[1].to_s }
+
       subtype.class_eval <<~RUBY
-        include Visitable
+        include Visitable # Visitor pattern
         attr_reader #{parameters.map { ":" + _1 }.join(', ')}
         def initialize(#{parameters.map { _1 + ":" }.join(', ')})
           #{parameters.map { "@" + _1 }.join(', ')} = #{parameters.join ', '}
         end
 
+        # Dynamically generated for visitor pattern.
+        # Expects visitor to define #visit_#{class_name}
         def accept(visitor)
           visitor.visit_#{class_name}(self)
         end
