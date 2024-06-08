@@ -32,15 +32,17 @@ class Lox
     def define_ast(base_name, types)
       base_class = Class.new
       base_class.include Visitable
+      # Define boilerplate visitor methods
+      Visitor.define_types(base_name, types.keys)
       # Dynamically create subclasses for each AST type
       types.each do |class_name, fields|
-        define_type(base_class, class_name, fields)
+        define_type(base_class, base_name, class_name, fields)
       end
 
-      define_class base_name, base_class
+      define_class base_name.to_camel_case, base_class
     end
 
-    def define_type(base_class, class_name, fields)
+    def define_type(base_class, base_class_name, subtype_name, fields)
       subtype = Class.new(base_class)
       parameters = fields.map { _1[1].to_s }
 
@@ -52,13 +54,13 @@ class Lox
         end
 
         # Dynamically generated for visitor pattern.
-        # Expects visitor to define #visit_#{class_name}
+        # Expects visitor to define #visit_#{subtype_name}
         def accept(visitor)
-          visitor.visit_#{class_name}(self)
+          visitor.visit_#{subtype_name}_#{base_class_name}(self)
         end
       RUBY
 
-      define_class(class_name.to_camel_case, subtype, base_class:)
+      define_class(subtype_name.to_camel_case, subtype, base_class:)
     end
 
     def define_class(class_name, klass, base_class: Lox::AST)
@@ -68,7 +70,7 @@ class Lox
 end
 
 Lox::AST.define_ast(
-  "Expression",
+  :expression,
   {
     :binary => [[:expr, :left], [:token, :operator], [:expr, :right]],
     :grouping => [[:expr, :expression]],

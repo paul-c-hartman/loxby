@@ -5,19 +5,12 @@ module Visitable
 end
 
 class Visitor
-  def visit_binary(_)
-    raise NotImplementedError, "#{self.class} has not implemented #visit_binary"
-  end
-  
-  def visit_grouping(_)
-    raise NotImplementedError, "#{self.class} has not implemented #visit_grouping"
-  end
-
-  def visit_literal(_)
-    raise NotImplementedError, "#{self.class} has not implemented #visit_literal"
-  end
-
-  def visit_unary(_)
-    raise NotImplementedError, "#{self.class} has not implemented #visit_unary"
+  def self.define_types(base_type, subtypes)
+    subtypes.each do |subtype|
+      method_name = "visit_#{subtype}_#{base_type}"
+      define_method(method_name.to_sym) do |_|
+        raise NotImplementedError, "#{self.class} has not implemented ##{method_name}"
+      end
+    end
   end
 end
