@@ -76,7 +76,8 @@ Lox::AST.define_ast(
     :ternary => [[:expr, :left], [:token, :left_operator], [:expr, :center], [:token, :right_operator], [:expr, :right]],
     :grouping => [[:expr, :expression]],
     :literal => [[:object, :value]],
-    :unary => [[:token, :operator], [:expr, :right]]
+    :unary => [[:token, :operator], [:expr, :right]],
+    :variable => [[:token, :name]]
   }
 )
 
@@ -84,6 +85,7 @@ Lox::AST.define_ast(
   :statement,
   {
     :expression => [[:expr, :expression]],
-    :print => [[:expr, :expression]]
+    :print => [[:expr, :expression]],
+    :var => [[:token, :name], [:expr, :initializer]]
   }
 )

@@ -1,10 +1,12 @@
 require_relative 'loxby'
 require_relative 'errors'
+require_relative 'environment'
 require_relative 'visitors/base'
 
 class Interpreter < Visitor
   def initialize(process)
     @process = process
+    @environment = Lox::Environment.new
   end
 
   def interpret(statements)
@@ -47,6 +49,15 @@ class Interpreter < Visitor
   def visit_print_statement(statement)
     value = lox_eval statement.expression
     puts lox_obj_to_str(value)
+  end
+
+  def visit_var_statement(statement)
+    value = statement.initializer ? lox_eval(statement.initializer) : nil
+    @environment[statement.name] = value
+  end
+
+  def visit_variable_expression(expr)
+    @environment[expr.name]
   end
 
   # Leaves of the AST. The scanner picks

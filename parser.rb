@@ -14,8 +14,26 @@ class Lox
 
     def parse
       statements = []
-      statements << statement until end_of_input?
+      statements << declaration until end_of_input?
       statements
+    end
+
+    def declaration
+      if matches?(:var)
+        var_declaration
+      else
+        statement
+      end
+    rescue Lox::ParseError => e
+      synchronize
+      nil
+    end
+
+    def var_declaration
+      name = consume :identifier, "Expect variable name."
+      initializer = matches?(:equal) ? expression : nil
+      consume :semicolon, "Expect ';' after variable declaration."
+      Lox::AST::Statement::Var.new(name:, initializer:)
     end
 
     def statement
@@ -140,6 +158,8 @@ class Lox
         Lox::AST::Expression::Literal.new(value: nil)
       elsif matches? :number, :string
         Lox::AST::Expression::Literal.new(value: previous.literal)
+      elsif matches? :identifier
+        Lox::AST::Expression::Variable.new(name: previous)
       elsif matches? :left_paren
         expr = expression_list
         consume :right_paren, "Expect ')' after expression."
