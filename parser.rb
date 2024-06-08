@@ -36,8 +36,13 @@ class Lox
 
       if matches? :question
         left_operator = previous
-        center = expression_list
-        consume :colon, "Expect ':' after '?' (ternary operator)."
+        if check :colon
+          # Empty center statement. I'll allow it.
+          center = Lox::AST::Expression::Literal.new(value: nil)
+        else
+          center = expression_list
+        end
+        consume :colon, "Expect ':' after expression (ternary operator)."
         right_operator = previous
         right = conditional # Recurse, right-associative
         expr = Lox::AST::Expression::Ternary.new(left: expr, left_operator:, center:, right_operator:, right:)
@@ -123,6 +128,34 @@ class Lox
         expr = expression_list
         consume :right_paren, "Expect ')' after expression."
         Lox::AST::Expression::Grouping.new(expression: expr)
+      # Error productions--binary operator without left operand
+      elsif matches? :comma
+        err = error(previous, "Expect expression before ',' operator.")
+        conditional # Parse and throw away
+        raise err
+      elsif matches? :question
+        err = error(previous, "Expect expression before ternary operator.")
+        expression_list
+        consume :colon, "Expect ':' after '?' (ternary operator)."
+        conditional
+        raise err
+      elsif matches? :bang_equal, :equal_equal
+        err = error(previous, "Expect value before '#{previous.lexeme}'.")
+        comparison
+        raise err
+      elsif matches? :greater, :greater_equal, :less, :less_equal
+        err = error(previous, "Expect value before '#{previous.lexeme}'.")
+        term
+        raise err
+      elsif matches? :plus
+        err = error(previous, "Expect value before '+'.")
+        factor
+        raise err
+      elsif matches? :slash, :star
+        err = error(previous, "Expect value before '#{previous.lexeme}'.")
+        unary
+        raise err
+      # Base case--no match.
       else
         raise error(peek, "Expect expression.")
       end

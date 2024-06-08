@@ -26,7 +26,7 @@ class ASTPrinter < Visitor
   end
 
   def visit_literal_expression(expr)
-    expr.value.to_s
+    expr.value.nil? ? 'nil' : expr.value.to_s
   end
 
   def visit_unary_expression(expr)
