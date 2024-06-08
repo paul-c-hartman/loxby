@@ -1,5 +1,8 @@
 # Lox interpreter in Ruby
 require_relative 'scanner'
+require_relative 'token_type'
+require_relative 'parser'
+require_relative 'visitors/ast_printer'
 
 class Lox
   attr_reader :errored
@@ -27,13 +30,23 @@ class Lox
   # Run a string
   def run(source)
     tokens = Scanner.new(source, self).scan_tokens
+    parser = Parser.new(tokens, self)
+    expression = parser.parse
 
-    # For now, just print tokens.
-    tokens.each { puts _1 }
+    # We have a parser now! :)
+    return if @errored
+    puts ASTPrinter.new.print(expression)
   end
 
   def error(line, message)
-    report(line, "", message)
+    if line.is_a? Lox::Token
+      # Parse/runtime error
+      where = line.type == :eof ? 'end' : "'#{line.lexeme}'"
+      report(line.line, " at " + where, message)
+    else
+      # Scan error
+      report(line, "", message)
+    end
   end
 
   private def report(line, where, message)
