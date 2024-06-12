@@ -8,9 +8,9 @@ Gem::Specification.new do |s|
   s.authors = ['Paul Hartman']
   s.email = ['real.paul.hartman@gmail.com']
 
-  s.summary = 'TODO: write a short summary'
+  s.summary = 'A Lox interpreter written in Ruby'
   s.description = 'TODO: write a longer description'
-  s.homepage = 'TODO: upload to GitHub and put URL here'
+  s.homepage = 'https://github.com/paul-c-hartman/loxby'
   s.license = 'MIT'
   s.required_ruby_version = Gem::Requirement.new('>= 3.1.0') # Shorthand hash syntax
 
