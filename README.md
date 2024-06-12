@@ -11,3 +11,6 @@ Loxby is written following the first half of Robert Nystrom's wonderful web-form
     require 'loxby/runner'
     Lox::Runner.new(ARGV, $stdout, $stderr)
     ```
+
+## License
+This gem is licensed under the [MIT License](https://opensource.org/license/mit). See LICENSE.txt for more.
