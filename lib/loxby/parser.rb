@@ -119,7 +119,7 @@ class Lox
     end
 
     def assignment # rubocop:disable Metrics/MethodLength
-      expr = equality
+      expr = logical_or
 
       if matches? :equal
         equals = previous
@@ -131,6 +131,30 @@ class Lox
         end
 
         error equals, 'Invalid assignment target.'
+      end
+
+      expr
+    end
+
+    def logical_or
+      expr = logical_and
+
+      while matches? :or
+        operator = previous
+        right = logical_and
+        expr = Lox::AST::Expression::Logical.new(left: expr, operator:, right:)
+      end
+
+      expr
+    end
+
+    def logical_and
+      expr = equality
+
+      while matches? :and
+        operator = previous
+        right = logical_and
+        expr = Lox::AST::Expression::Logical.new(left: expr, operator:, right:)
       end
 
       expr

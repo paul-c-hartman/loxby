@@ -78,6 +78,7 @@ Lox::AST.define_ast(
     ternary: [%i[expr left], %i[token left_operator], %i[expr center], %i[token right_operator], %i[expr right]],
     grouping: [%i[expr expression]],
     literal: [%i[object value]],
+    logical: [%i[expr left], %i[token operator], %i[expr right]],
     unary: [%i[token operator], %i[expr right]],
     variable: [%i[token name]]
   }

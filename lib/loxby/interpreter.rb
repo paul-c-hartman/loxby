@@ -100,6 +100,17 @@ class Interpreter < Visitor
     expr.value
   end
 
+  def visit_logical_expression(expr)
+    left = lox_eval expr.left
+
+    case expr.operator.type
+    when :or
+      left if truthy? left
+    else # Just and, for now
+      truthy?(left) ? lox_eval(expr.right) : left
+    end
+  end
+
   def visit_grouping_expression(expr)
     lox_eval expr
   end
