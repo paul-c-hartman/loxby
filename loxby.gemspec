@@ -9,7 +9,12 @@ Gem::Specification.new do |s|
   s.email = ['real.paul.hartman@gmail.com']
 
   s.summary = 'A Lox interpreter written in Ruby'
-  s.description = 'TODO: write a longer description'
+  s.description = 'Loxby is written following the first ' \
+  "half of Robert Nystrom's wonderful web-format book " \
+  '[Crafting Interpreters](https://www.craftinginterpreters.com), ' \
+  'adapting the Java code to modern Ruby. This project is ' \
+  'intended to explore what elegant object-oriented code ' \
+  'can look like and accomplish.'
   s.homepage = 'https://github.com/paul-c-hartman/loxby'
   s.license = 'MIT'
   s.required_ruby_version = Gem::Requirement.new('>= 3.1.0') # Shorthand hash syntax
