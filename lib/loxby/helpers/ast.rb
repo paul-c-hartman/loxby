@@ -91,6 +91,7 @@ Lox::AST.define_ast(
     expression: [%i[expr expression]],
     if: [%i[expr condition], %i[stmt then_branch], %i[stmt else_branch]],
     print: [%i[expr expression]],
-    var: [%i[token name], %i[expr initializer]]
+    var: [%i[token name], %i[expr initializer]],
+    while: [%i[expr condition], %i[stmt body]]
   }
 )

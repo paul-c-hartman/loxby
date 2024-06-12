@@ -68,6 +68,12 @@ class Interpreter < Visitor
     @environment[statement.name] = value
   end
 
+  def visit_while_statement(statement)
+    value = nil
+    (value = lox_eval statement.body) while truthy?(lox_eval(statement.condition))
+    value
+  end
+
   def visit_variable_expression(expr)
     @environment[expr.name]
   end

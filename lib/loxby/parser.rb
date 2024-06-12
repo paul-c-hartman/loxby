@@ -41,11 +41,13 @@ class Lox
       Lox::AST::Statement::Var.new(name:, initializer:)
     end
 
-    def statement
+    def statement # rubocop:disable Metrics/MethodLength
       if matches? :if
         if_statement
       elsif matches? :print
         print_statement
+      elsif matches? :while
+        while_statement
       elsif matches? :left_brace
         Lox::AST::Statement::Block.new(statements: block)
       else
@@ -78,6 +80,15 @@ class Lox
       else_branch = matches?(:else) ? statement : nil
 
       Lox::AST::Statement::If.new(condition:, then_branch:, else_branch:)
+    end
+
+    def while_statement
+      consume :left_paren, "Expect '(' after 'while'."
+      condition = expression_list
+      consume :right_paren, "Expect ')' after condition."
+      body = statement
+
+      Lox::AST::Statement::While.new(condition:, body:)
     end
 
     def expression_statement
