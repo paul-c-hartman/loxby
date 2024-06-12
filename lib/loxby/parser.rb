@@ -42,7 +42,9 @@ class Lox
     end
 
     def statement
-      if matches? :print
+      if matches? :if
+        if_statement
+      elsif matches? :print
         print_statement
       elsif matches? :left_brace
         Lox::AST::Statement::Block.new(statements: block)
@@ -62,6 +64,20 @@ class Lox
       value = expression_list
       consume :semicolon, "Expect ';' after value."
       Lox::AST::Statement::Print.new(expression: value)
+    end
+
+    def if_statement
+      consume :left_paren, "Expect '(' after 'if'."
+      condition = expression_list
+      consume :right_paren, "Expect ')' after if condition."
+
+      # We don't go up to var declaration because variables
+      # declared inside an if statement should be inside a
+      # *block* inside the if statement.
+      then_branch = statement
+      else_branch = matches?(:else) ? statement : nil
+
+      Lox::AST::Statement::If.new(condition:, then_branch:, else_branch:)
     end
 
     def expression_statement

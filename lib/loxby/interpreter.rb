@@ -50,6 +50,14 @@ class Interpreter < Visitor
     lox_eval statement.expression
   end
 
+  def visit_if_statement(statement)
+    if truthy? lox_eval(statement.condition)
+      lox_eval statement.then_branch
+    elsif !statement.else_branch.nil?
+      lox_eval statement.else_branch
+    end
+  end
+
   def visit_print_statement(statement)
     value = lox_eval statement.expression
     puts lox_obj_to_str(value)
@@ -75,9 +83,13 @@ class Interpreter < Visitor
   end
 
   def execute_block(statements, environment)
+    value = nil
     previous = @environment
     @environment = environment
-    statements.each { lox_eval _1 }
+    statements.each { value = lox_eval _1 }
+    value
+  rescue Lox::RunError
+    nil
   ensure
     @environment = previous
   end
