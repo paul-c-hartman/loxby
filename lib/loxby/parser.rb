@@ -42,7 +42,9 @@ class Lox
     end
 
     def statement # rubocop:disable Metrics/MethodLength
-      if matches? :if
+      if matches? :for
+        for_statement
+      elsif matches? :if
         if_statement
       elsif matches? :print
         print_statement
@@ -89,6 +91,52 @@ class Lox
       body = statement
 
       Lox::AST::Statement::While.new(condition:, body:)
+    end
+
+    def for_statement # rubocop:disable Metrics/MethodLength,Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+      consume :left_paren, "Expect '(' after 'for'."
+
+      initializer =
+        if matches? :semicolon
+          nil
+        elsif matches? :var
+          var_declaration
+        else
+          expression_statement
+        end
+
+      condition = nil
+      condition = expression unless check :semicolon
+      consume :semicolon, "Expect ';' after loop condition."
+
+      increment = nil
+      increment = expression unless check :right_paren
+      consume :right_paren, "Expect ')' after for clauses."
+
+      body = statement
+
+      unless increment.nil?
+        body = Lox::AST::Statement::Block.new(
+          statements: [
+            body,
+            Lox::AST::Statement::Expression.new(expression: increment)
+          ]
+        )
+      end
+
+      condition = Lox::AST::Expression::Literal.new(value: true) if condition.nil?
+      body = Lox::AST::Statement::While.new(condition:, body:)
+
+      unless initializer.nil?
+        body = Lox::AST::Statement::Block.new(
+          statements: [
+            initializer,
+            body
+          ]
+        )
+      end
+
+      body
     end
 
     def expression_statement
