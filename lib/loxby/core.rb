@@ -20,7 +20,11 @@ class Lox
 
   # Run from file
   def run_file(path)
-    run File.read(path)
+    if File.exist? path
+      run File.read(path)
+    else
+      report(0, '', "No such file: '#{path}'")
+    end
     exit(65) if @errored # Don't execute malformed code
     exit(70) if @errored_in_runtime
   end
