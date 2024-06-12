@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'loxby'
-
 class Lox
   class ParseError < RuntimeError; end
 

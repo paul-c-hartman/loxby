@@ -1,5 +1,6 @@
-require_relative 'loxby'
-require_relative 'token_type'
+# frozen_string_literal: true
+
+require_relative 'helpers/token_type'
 
 class Lox
   class Scanner
@@ -7,12 +8,13 @@ class Lox
       whitespace: /\s/,
       number_literal: /\d/,
       identifier: /[a-zA-Z_]/
-    }
-    KEYWORDS = %w{and class else false for fun if nil or print return super this true var while}
-      .map { [_1, _1.to_sym] }
-      .to_h
-  
+    }.freeze
+    KEYWORDS = %w[and class else false for fun if nil or print return super this true var while]
+               .map { [_1, _1.to_sym] }
+               .to_h
+
     attr_accessor :line
+
     def initialize(source, interpreter)
       @source = source
       @tokens = []
@@ -22,21 +24,21 @@ class Lox
       @current = 0
       @line = 1
     end
-  
+
     def scan_tokens
       until end_of_source?
         # Beginnning of next lexeme
         @start = @current
         scan_token
       end
-  
+
       # Implicitly return @tokens
       @tokens << Lox::Token.new(:eof, "", nil, @line)
     end
-  
-    def scan_token
+
+    def scan_token # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       character = advance_character
-  
+
       case character
       # Single-character tokens
       when '('
@@ -86,7 +88,6 @@ class Lox
       when "\n"
         @line += 1
       when EXPRESSIONS[:whitespace]
-        # Ignore
       # Literals
       when '"'
         scan_string
@@ -97,92 +98,92 @@ class Lox
         scan_identifier
       else
         # Unknown character
-        @interpreter.error(@line, "Unexpected character.")
+        @interpreter.error(@line, 'Unexpected character.')
       end
     end
-  
-    def scan_block_comment
-      advance_character until (peek == "*" && peek_next == "/") || (peek == "/" && peek_next == "*") || end_of_source?
-  
+
+    def scan_block_comment # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
+      advance_character until (peek == '*' && peek_next == '/') || (peek == '/' && peek_next == '*') || end_of_source?
+
       if end_of_source? || peek_next == "\0"
-        @interpreter.error(line, "Unterminated block comment.")
+        @interpreter.error(line, 'Unterminated block comment.')
         return
-      elsif peek == "/" && peek_next == "*"
+      elsif peek == '/' && peek_next == '*'
         # Nested block comment. Skip opening characters
-        match "/"
-        match "*"
+        match '/'
+        match '*'
         scan_block_comment # Skip nested comment
-        advance_character until (peek == "*" && peek_next == "/") || (peek == "/" && peek_next == "*") || end_of_source?
+        advance_character until (peek == '*' && peek_next == '/') || (peek == '/' && peek_next == '*') || end_of_source?
       end
-  
+
       # Skip closing characters
-      match "*"
-      match "/"
+      match '*'
+      match '/'
     end
-  
-    def scan_string
+
+    def scan_string # rubocop:disable Metrics/MethodLength
       until peek == '"' || end_of_source?
         @line += 1 if peek == "\n"
         advance_character
       end
-  
+
       if end_of_source?
-        @interpreter.error(line, "Unterminated string.")
+        @interpreter.error(line, 'Unterminated string.')
         return
       end
-  
+
       # Skip closing "
       advance_character
-  
+
       # Trim quotes around literal
       value = @source[(@start + 1)...(@current - 1)]
       add_token :string, value
     end
-  
+
     def scan_number
       advance_character while peek =~ EXPRESSIONS[:number_literal]
-  
+
       # Check for decimal
       if peek == '.' && peek_next =~ EXPRESSIONS[:number_literal]
         # Consume decimal point
         advance_character
         advance_character while peek =~ EXPRESSIONS[:number_literal]
       end
-  
+
       add_token :number, @source[@start...@current].to_f
     end
-  
+
     def scan_identifier
       advance_character while peek =~ Regexp.union(EXPRESSIONS[:identifier], /\d/)
       text = @source[@start...@current]
       add_token(KEYWORDS[text] || :identifier)
     end
-  
+
     def advance_character
       character = @source[@current]
       @current += 1
       character
     end
-  
+
     def add_token(type, literal = nil)
       text = @source[@start...@current]
       @tokens << Lox::Token.new(type, text, literal, @line)
     end
-  
+
     def match(expected)
       return false unless @source[@current] == expected || end_of_source?
-  
+
       @current += 1
       true
     end
-  
+
     def end_of_source? = @current >= @source.size
-  
+
     # 1-character lookahead
     def peek
       end_of_source? ? "\0" : @source[@current]
     end
-  
+
     # 2-character lookahead
     def peek_next
       (@current + 1) > @source.size ? "\0" : @source[@current + 1]

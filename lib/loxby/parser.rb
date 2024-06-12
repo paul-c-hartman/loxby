@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'loxby'
-require_relative 'ast'
-require_relative 'token_type'
-require_relative 'errors'
+require_relative 'helpers/ast'
+require_relative 'helpers/errors'
 
 class Lox
   # Lox::Parser converts a list of tokens

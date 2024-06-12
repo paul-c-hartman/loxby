@@ -1,4 +1,6 @@
-require_relative 'loxby'
+# frozen_string_literal: true
+
+require_relative 'errors'
 
 class Lox
   # Lox::Environment stores namespace for

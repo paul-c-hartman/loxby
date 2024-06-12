@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'base'
 
 class ASTPrinter < Visitor
@@ -10,7 +12,7 @@ class ASTPrinter < Visitor
     args[1..].each do |expr|
       str << " #{expr.accept self}"
     end
-    str << ")"
+    str << ')'
   end
 
   def visit_binary_expression(expr)
@@ -22,7 +24,7 @@ class ASTPrinter < Visitor
   end
 
   def visit_grouping_expression(expr)
-    parenthesize "group", expr.expression
+    parenthesize 'group', expr.expression
   end
 
   def visit_literal_expression(expr)

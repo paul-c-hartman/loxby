@@ -1,8 +1,8 @@
-require_relative 'loxby'
+# frozen_string_literal: true
 
 class Lox
   class Token
-    Tokens = [
+    TOKENS = [
       # Single-character tokens.
       :left_paren, :right_paren, :left_brace, :right_brace,
       :comma, :dot, :minus, :plus, :semicolon, :slash, :star,
@@ -22,15 +22,19 @@ class Lox
       :print, :return, :super, :this, :true, :var, :while,
 
       :eof
-    ]
-    SingleTokens = Tokens.zip('(){},.-+;/*'.split('')).to_h
+    ].freeze
+    SINGLE_TOKENS = TOKENS.zip('(){},.-+;/*'.split('')).to_h
 
     attr_reader :type, :lexeme, :literal, :line
+
     def initialize(type, lexeme, literal, line)
-      @type, @lexeme, @literal, @line = type, lexeme, literal, line
+      @type = type
+      @lexeme = lexeme
+      @literal = literal
+      @line = line
     end
 
     def to_s = "#{type} #{lexeme} #{literal}"
-    def inspect = "#<Lox::Token #{to_s}>"
+    def inspect = "#<Lox::Token #{self}>"
   end
 end

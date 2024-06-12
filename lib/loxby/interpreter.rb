@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-require_relative 'loxby'
-require_relative 'errors'
-require_relative 'environment'
+require_relative 'helpers/environment'
+require_relative 'helpers/errors'
 require_relative 'visitors/base'
 
 # Interpreter class. Walks the AST using

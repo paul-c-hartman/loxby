@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'loxby'
-require_relative 'visitors/base'
+require_relative '../visitors/base'
 
 class String # rubocop:disable Style/Documentation
   def to_camel_case

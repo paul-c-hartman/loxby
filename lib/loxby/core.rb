@@ -1,12 +1,9 @@
-# Lox interpreter in Ruby
 # frozen_string_literal: true
 
 require_relative 'scanner'
-require_relative 'token_type'
 require_relative 'parser'
 require_relative 'interpreter'
-require_relative 'errors'
-require_relative 'visitors/ast_printer'
+require_relative 'helpers/token_type'
 
 # Lox interpreter.
 # Each interpreter keeps track of its own
@@ -78,21 +75,3 @@ class Lox
   end
 end
 # rubocop:enable Style/StderrPuts
-
-# Entry point for script.
-# Print usage if too many arguments, run
-# script if script file provided, run
-# interactively if run alone. Don't run
-# if loaded with `require`.
-if __FILE__ == $PROGRAM_NAME
-  trap('SIGINT') { exit } # Exit cleanly on Ctrl-C
-  INTERPRETER = Lox.new
-  if ARGV.size > 1
-    puts 'Usage: loxby.rb [script]'
-    exit 64
-  elsif ARGV.size == 1
-    INTERPRETER.run_file ARGV[0]
-  else
-    INTERPRETER.run_prompt
-  end
-end
