@@ -1,4 +1,6 @@
 # Lox interpreter in Ruby
+# frozen_string_literal: true
+
 require_relative 'scanner'
 require_relative 'token_type'
 require_relative 'parser'
@@ -6,8 +8,13 @@ require_relative 'interpreter'
 require_relative 'errors'
 require_relative 'visitors/ast_printer'
 
+# Lox interpreter.
+# Each interpreter keeps track of its own
+# environment, including variable and
+# function scope.
 class Lox
   attr_reader :errored, :interpreter
+
   def initialize
     @errored = false
     @errored_in_runtime = false
@@ -24,9 +31,10 @@ class Lox
   # Run interactively
   def run_prompt
     loop do
-      print "> "
+      print '> '
       line = gets
       break unless line # Trap eof (Ctrl+D unix, Ctrl+Z win)
+
       result = run(line)
       puts "=> #{@interpreter.lox_obj_to_str result}" unless @errored
       @errored = false # Reset so a mistake doesn't kill the repl
@@ -38,8 +46,8 @@ class Lox
     tokens = Scanner.new(source, self).scan_tokens
     parser = Parser.new(tokens, self)
     statements = parser.parse
-
     return if @errored
+
     @interpreter.interpret statements
   end
 
@@ -47,12 +55,14 @@ class Lox
     if line.is_a? Lox::Token
       # Parse/runtime error
       where = line.type == :eof ? 'end' : "'#{line.lexeme}'"
-      report(line.line, " at " + where, message)
+      report(line.line, " at #{where}", message)
     else
       # Scan error
-      report(line, "", message)
+      report(line, '', message)
     end
   end
+
+  # rubocop:disable Style/StderrPuts
 
   def runtime_error(err)
     $stderr.puts err.message
@@ -60,21 +70,25 @@ class Lox
     @errored_in_runtime = true
   end
 
-  private def report(line, where, message)
+  private
+
+  def report(line, where, message)
     $stderr.puts "[line #{line}] Error#{where}: #{message}"
     @errored = true
   end
 end
+# rubocop:enable Style/StderrPuts
 
-# Entry point for script. Print usage if
-# too many arguments, run script if script
-# file provided, run interactively if run
-# alone. Don't run if loaded with `require`.
+# Entry point for script.
+# Print usage if too many arguments, run
+# script if script file provided, run
+# interactively if run alone. Don't run
+# if loaded with `require`.
 if __FILE__ == $PROGRAM_NAME
-  trap("SIGINT") { exit } # Exit cleanly on Ctrl-C
+  trap('SIGINT') { exit } # Exit cleanly on Ctrl-C
   INTERPRETER = Lox.new
   if ARGV.size > 1
-    puts "Usage: loxby.rb [script]"
+    puts 'Usage: loxby.rb [script]'
     exit 64
   elsif ARGV.size == 1
     INTERPRETER.run_file ARGV[0]

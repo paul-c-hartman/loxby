@@ -1,10 +1,14 @@
+# frozen_string_literal: true
+
 require_relative 'loxby'
 require_relative 'errors'
 require_relative 'environment'
 require_relative 'visitors/base'
 
+# Interpreter class. Walks the AST using
+# the Visitor pattern.
 class Interpreter < Visitor
-  def initialize(process)
+  def initialize(process) # rubocop:disable Lint/MissingSuper
     @process = process
     @environment = Lox::Environment.new
   end
@@ -12,7 +16,7 @@ class Interpreter < Visitor
   def interpret(statements)
     result = nil
     statements.each { result = lox_eval(_1) }
-    return result
+    result
   rescue Lox::RunError => e
     @process.runtime_error e
   end
@@ -28,7 +32,7 @@ class Interpreter < Visitor
   end
 
   def ensure_number(operator, *objs)
-    raise Lox::RunError.new(operator, "Operand must be a number.") unless objs.all? { _1.is_a?(Float) }
+    raise Lox::RunError.new(operator, 'Operand must be a number.') unless objs.all? { _1.is_a?(Float) }
   end
 
   def lox_obj_to_str(obj)
@@ -36,9 +40,7 @@ class Interpreter < Visitor
     when nil
       'nil'
     when Float
-      if obj.to_s[-2..] == '.0'
-        obj.to_s[0...-2]
-      end
+      obj.to_s[-2..] == '.0' ? obj.to_s[0...-2] : obj.to_s
     else
       obj.to_s
     end
@@ -96,13 +98,13 @@ class Interpreter < Visitor
     case expr.operator.type
     when :minus
       ensure_number(expr.operator, right)
-      -(right.to_f)
+      -right.to_f
     when :bang
       truthy? right
     end
   end
 
-  def visit_binary_expression(expr)
+  def visit_binary_expression(expr) # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/AbcSize
     left = lox_eval expr.left
     right = lox_eval expr.right
     case expr.operator.type
@@ -110,18 +112,19 @@ class Interpreter < Visitor
       ensure_number(expr.operator, left, right)
       left.to_f - right.to_f
     when :slash
-      raise Lox::DividedByZeroError.new(expr.operator, "Cannot divide by zero.") if right == 0.0
+      raise Lox::DividedByZeroError.new(expr.operator, 'Cannot divide by zero.') if right == 0.0
+
       ensure_number(expr.operator, left, right)
-      left.to_f / right.to_f
+      left.to_f / right
     when :star
       ensure_number(expr.operator, left, right)
       left.to_f * right.to_f
     when :plus
-      if (left.is_a?(Float) || left.is_a?(String)) && left.class == right.class
-        left + right
-      else
-        raise Lox::RunError.new(expr.operator, "Operands must be two numbers or two strings.")
+      unless (left.is_a?(Float) || left.is_a?(String)) && left.instance_of?(right.class)
+        raise Lox::RunError.new(expr.operator, 'Operands must be two numbers or two strings.')
       end
+
+      left + right
     when :greater
       ensure_number(expr.operator, left, right)
       left.to_f > right.to_f
@@ -145,7 +148,7 @@ class Interpreter < Visitor
 
   def visit_ternary_expression(expr)
     left = lox_eval expr.left
-    
+
     left ? lox_eval(expr.center) : lox_eval(expr.right)
   end
 end

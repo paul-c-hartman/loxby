@@ -1,6 +1,11 @@
+# frozen_string_literal: true
+
 require_relative 'loxby'
 
 class Lox
+  # Lox::Environment stores namespace for
+  # a Lox interpreter. Environments can be
+  # nested (for scope).
   class Environment
     def initialize(enclosing = nil)
       @enclosing = enclosing

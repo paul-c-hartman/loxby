@@ -1,9 +1,16 @@
+# frozen_string_literal: true
+
 require_relative 'loxby'
 require_relative 'ast'
 require_relative 'token_type'
 require_relative 'errors'
 
 class Lox
+  # Lox::Parser converts a list of tokens
+  # from Lox::Scanner to a syntax tree.
+  # This tree can be interacted with using
+  # the Visitor pattern. (See the Visitor
+  # class in visitors/base.rb.)
   class Parser
     def initialize(tokens, interpreter)
       @tokens = tokens
@@ -24,13 +31,13 @@ class Lox
       else
         statement
       end
-    rescue Lox::ParseError => e
+    rescue Lox::ParseError
       synchronize
       nil
     end
 
     def var_declaration
-      name = consume :identifier, "Expect variable name."
+      name = consume :identifier, 'Expect variable name.'
       initializer = matches?(:equal) ? expression : nil
       consume :semicolon, "Expect ';' after variable declaration."
       Lox::AST::Statement::Var.new(name:, initializer:)
@@ -73,7 +80,7 @@ class Lox
         right = conditional
         expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)
       end
-      
+
       expr
     end
 
@@ -83,12 +90,7 @@ class Lox
 
       if matches? :question
         left_operator = previous
-        if check :colon
-          # Empty center statement. I'll allow it.
-          center = Lox::AST::Expression::Literal.new(value: nil)
-        else
-          center = expression_list
-        end
+        center = check(:colon) ? Lox::AST::Expression::Literal.new(value: nil) : expression_list
         consume :colon, "Expect ':' after expression (ternary operator)."
         right_operator = previous
         right = conditional # Recurse, right-associative
@@ -102,7 +104,7 @@ class Lox
       assignment
     end
 
-    def assignment
+    def assignment # rubocop:disable Metrics/MethodLength
       expr = equality
 
       if matches? :equal
@@ -114,7 +116,7 @@ class Lox
           return Lox::AST::Expression::Assign.new(name:, value:)
         end
 
-        error equals, "Invalid assignment target."
+        error equals, 'Invalid assignment target.'
       end
 
       expr
@@ -157,7 +159,7 @@ class Lox
 
     def factor
       expr = unary
-      
+
       while matches?(:slash, :star)
         operator = previous
         right = unary
@@ -180,7 +182,7 @@ class Lox
       end
     end
 
-    def primary
+    def primary # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       if matches? :false
         Lox::AST::Expression::Literal.new(value: false)
       elsif matches? :true
@@ -201,7 +203,7 @@ class Lox
         conditional # Parse and throw away
         raise err
       elsif matches? :question
-        err = error(previous, "Expect expression before ternary operator.")
+        err = error(previous, 'Expect expression before ternary operator.')
         expression_list
         consume :colon, "Expect ':' after '?' (ternary operator)."
         conditional
@@ -224,12 +226,12 @@ class Lox
         raise err
       # Base case--no match.
       else
-        raise error(peek, "Expect expression.")
+        raise error(peek, 'Expect expression.')
       end
     end
 
     private
-    
+
     def consume(type, message)
       return advance if check(type)
 

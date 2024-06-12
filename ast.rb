@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 require_relative 'loxby'
 require_relative 'visitors/base'
 
-class String
+class String # rubocop:disable Style/Documentation
   def to_camel_case
-    to_s.split(/[_\-]/).map(&:capitalize).join('')
+    to_s.split(/[-_]/).map(&:capitalize).join('')
   end
 end
 
-class Symbol
+class Symbol # rubocop:disable Style/Documentation
   def to_camel_case
     to_s.to_camel_case.to_sym
   end
@@ -42,15 +44,15 @@ class Lox
       define_class base_name.to_camel_case, base_class
     end
 
-    def define_type(base_class, base_class_name, subtype_name, fields)
+    def define_type(base_class, base_class_name, subtype_name, fields) # rubocop:disable Metrics/MethodLength
       subtype = Class.new(base_class)
       parameters = fields.map { _1[1].to_s }
 
-      subtype.class_eval <<~RUBY
+      subtype.class_eval <<~RUBY, __FILE__, __LINE__ + 1
         include Visitable # Visitor pattern
-        attr_reader #{parameters.map { ":" + _1 }.join(', ')}
-        def initialize(#{parameters.map { _1 + ":" }.join(', ')})
-          #{parameters.map { "@" + _1 }.join(', ')} = #{parameters.join ', '}
+        attr_reader #{parameters.map { ":#{_1}" }.join(', ')}
+        def initialize(#{parameters.map { "#{_1}:" }.join(', ')})
+          #{parameters.map { "@#{_1}" }.join(', ')} = #{parameters.join ', '}
         end
 
         # Dynamically generated for visitor pattern.
@@ -72,22 +74,22 @@ end
 Lox::AST.define_ast(
   :expression,
   {
-    :assign => [[:name, :value]],
-    :binary => [[:expr, :left], [:token, :operator], [:expr, :right]],
-    :ternary => [[:expr, :left], [:token, :left_operator], [:expr, :center], [:token, :right_operator], [:expr, :right]],
-    :grouping => [[:expr, :expression]],
-    :literal => [[:object, :value]],
-    :unary => [[:token, :operator], [:expr, :right]],
-    :variable => [[:token, :name]]
+    assign: [%i[name value]],
+    binary: [%i[expr left], %i[token operator], %i[expr right]],
+    ternary: [%i[expr left], %i[token left_operator], %i[expr center], %i[token right_operator], %i[expr right]],
+    grouping: [%i[expr expression]],
+    literal: [%i[object value]],
+    unary: [%i[token operator], %i[expr right]],
+    variable: [%i[token name]]
   }
 )
 
 Lox::AST.define_ast(
   :statement,
   {
-    :block => [[:stmt_list, :statements]],
-    :expression => [[:expr, :expression]],
-    :print => [[:expr, :expression]],
-    :var => [[:token, :name], [:expr, :initializer]]
+    block: [%i[stmt_list statements]],
+    expression: [%i[expr expression]],
+    print: [%i[expr expression]],
+    var: [%i[token name], %i[expr initializer]]
   }
 )
