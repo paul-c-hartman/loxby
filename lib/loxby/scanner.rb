@@ -9,7 +9,7 @@ class Lox
       number_literal: /\d/,
       identifier: /[a-zA-Z_]/
     }.freeze
-    KEYWORDS = %w[and class else false for fun if nil or print return super this true var while]
+    KEYWORDS = %w[and class else false for fun if nil or print return super this true var while break]
                .map { [_1, _1.to_sym] }
                .to_h
 

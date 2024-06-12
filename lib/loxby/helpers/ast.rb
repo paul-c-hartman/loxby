@@ -43,15 +43,15 @@ class Lox
       define_class base_name.to_camel_case, base_class
     end
 
-    def define_type(base_class, base_class_name, subtype_name, fields) # rubocop:disable Metrics/MethodLength
+    def define_type(base_class, base_class_name, subtype_name, fields) # rubocop:disable Metrics/MethodLength,Metrics/AbcSize
       subtype = Class.new(base_class)
       parameters = fields.map { _1[1].to_s }
 
       subtype.class_eval <<~RUBY, __FILE__, __LINE__ + 1
         include Visitable # Visitor pattern
-        attr_reader #{parameters.map { ":#{_1}" }.join(', ')}
+        #{parameters.empty? ? '' : 'attr_reader '}#{parameters.map { ":#{_1}" }.join(', ')}
         def initialize(#{parameters.map { "#{_1}:" }.join(', ')})
-          #{parameters.map { "@#{_1}" }.join(', ')} = #{parameters.join ', '}
+          #{parameters.map { "@#{_1}" }.join(', ')}#{parameters.empty? ? '' : ' = '}#{parameters.join ', '}
         end
 
         # Dynamically generated for visitor pattern.
@@ -92,6 +92,7 @@ Lox::AST.define_ast(
     if: [%i[expr condition], %i[stmt then_branch], %i[stmt else_branch]],
     print: [%i[expr expression]],
     var: [%i[token name], %i[expr initializer]],
-    while: [%i[expr condition], %i[stmt body]]
+    while: [%i[expr condition], %i[stmt body]],
+    break: []
   }
 )

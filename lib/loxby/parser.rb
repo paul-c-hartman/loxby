@@ -57,9 +57,17 @@ class Lox
       end
     end
 
+    def break_or_declaration
+      if matches? :break
+        break_statement
+      else
+        declaration
+      end
+    end
+
     def block
       statements = []
-      statements << declaration until check(:right_brace) || end_of_input?
+      statements << break_or_declaration until check(:right_brace) || end_of_input?
       consume :right_brace, "Expect '}' after block."
       statements
     end
@@ -137,6 +145,11 @@ class Lox
       end
 
       body
+    end
+
+    def break_statement
+      consume :semicolon, "Expect ';' after break."
+      Lox::AST::Statement::Break.new
     end
 
     def expression_statement

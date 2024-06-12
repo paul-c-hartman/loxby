@@ -69,9 +69,11 @@ class Interpreter < Visitor
   end
 
   def visit_while_statement(statement)
-    value = nil
-    (value = lox_eval statement.body) while truthy?(lox_eval(statement.condition))
-    value
+    catch :break do # Jump beacon for break statements
+      value = nil
+      (value = lox_eval statement.body) while truthy?(lox_eval(statement.condition))
+      value
+    end
   end
 
   def visit_variable_expression(expr)
@@ -86,6 +88,10 @@ class Interpreter < Visitor
 
   def visit_block_statement(statement)
     execute_block(statement.statements, Lox::Environment.new(@environment))
+  end
+
+  def visit_break_statement(_)
+    throw :break
   end
 
   def execute_block(statements, environment)
