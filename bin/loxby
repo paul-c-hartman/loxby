@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# require_relative '../lib/loxby/runner'
+require 'bundler/setup'
 require 'loxby/runner'
 
 # Start interpreter when run as script
