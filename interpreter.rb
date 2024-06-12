@@ -12,7 +12,7 @@ class Interpreter < Visitor
   def interpret(statements)
     result = nil
     statements.each { result = lox_eval(_1) }
-    result
+    return result
   rescue Lox::RunError => e
     @process.runtime_error e
   end

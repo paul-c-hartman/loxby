@@ -27,7 +27,8 @@ class Lox
       print "> "
       line = gets
       break unless line # Trap eof (Ctrl+D unix, Ctrl+Z win)
-      run line
+      result = run(line)
+      puts "=> #{@interpreter.lox_obj_to_str result}" unless @errored
       @errored = false # Reset so a mistake doesn't kill the repl
     end
   end
@@ -70,6 +71,7 @@ end
 # file provided, run interactively if run
 # alone. Don't run if loaded with `require`.
 if __FILE__ == $PROGRAM_NAME
+  trap("SIGINT") { exit } # Exit cleanly on Ctrl-C
   INTERPRETER = Lox.new
   if ARGV.size > 1
     puts "Usage: loxby.rb [script]"
