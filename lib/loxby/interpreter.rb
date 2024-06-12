@@ -18,6 +18,7 @@ class Interpreter < Visitor
     result
   rescue Lox::RunError => e
     @process.runtime_error e
+    nil
   end
 
   def lox_eval(expr)

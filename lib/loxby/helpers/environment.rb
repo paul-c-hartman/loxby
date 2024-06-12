@@ -25,8 +25,10 @@ class Lox
     end
 
     def [](name)
-      if exists? name
+      if @values[name.lexeme]
         @values[name.lexeme]
+      elsif exists? name
+        raise Lox::RunError.new(name, "Declared variable not initialized: '#{name.lexeme}'")
       elsif @enclosing
         @enclosing[name]
       else
