@@ -301,6 +301,8 @@ class Lox
         Lox::AST::Expression::Literal.new(value: nil)
       elsif matches? :number, :string
         Lox::AST::Expression::Literal.new(value: previous.literal)
+      elsif matches? :break
+        raise error(previous, "Invalid 'break' not in loop.")
       elsif matches? :identifier
         Lox::AST::Expression::Variable.new(name: previous)
       elsif matches? :left_paren
