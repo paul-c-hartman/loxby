@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require_relative 'loxby'
 
 class Lox
@@ -12,7 +10,7 @@ class Lox
       @values = {}
     end
 
-    def undefined_variable
+    def undefined_variable(name)
       Lox::RunError.new(name, "Undefined variable '#{name.lexeme}'")
     end
 
@@ -20,23 +18,27 @@ class Lox
       @values[name.lexeme] = value
     end
 
+    def exists?(name)
+      @values.keys.member? name.lexeme
+    end
+
     def [](name)
-      if @values.keys.member? name.lexeme
+      if exists? name
         @values[name.lexeme]
       elsif @enclosing
         @enclosing[name]
       else
-        raise undefined_variable
+        raise undefined_variable(name)
       end
     end
 
     def assign(name, value)
-      if self[name]
+      if exists? name
         self[name] = value
       elsif @enclosing
         @enclosing.assign(name, value)
       else
-        raise undefined_variable
+        raise undefined_variable(name)
       end
     end
   end

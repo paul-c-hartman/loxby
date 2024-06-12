@@ -65,7 +65,7 @@ class Interpreter < Visitor
   end
 
   def visit_assign_expression(expr)
-    value = evaluate expr.value
+    value = lox_eval expr.value
     @environment.assign expr.name, value
     value
   end
