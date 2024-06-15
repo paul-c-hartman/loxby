@@ -9,7 +9,7 @@ class Lox
   # initialized from the command line.
   class Runner
     def initialize(out = $stdout, err = $stderr)
-      trap('SIGINT') { exit } # Exit cleanly on Ctrl-C
+      trap('INT') { exit 130 } # Exit cleanly. 130 is for interrupted scripts
       @interpreter = Lox.new
       @out = out
       @err = err
