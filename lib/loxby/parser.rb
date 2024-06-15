@@ -24,7 +24,9 @@ class Lox
     end
 
     def declaration
-      if matches?(:var)
+      if matches? :fun
+        function 'function'
+      elsif matches? :var
         var_declaration
       else
         statement
@@ -34,6 +36,32 @@ class Lox
       nil
     end
 
+    def function(kind) # rubocop:disable Metrics/MethodLength
+      name = nil
+      if check :identifier
+        # Named function
+        name = consume :identifier, "Expect #{kind} name."
+      end
+      consume :left_paren, "Expect '(' after #{kind} name."
+      parameters = []
+      loop do
+        break if check :right_paren
+
+        error(peek, "Can't have more than 255 parameters.") if parameters.size > 255
+
+        parameters << consume(:identifier, 'Expect parameter name.')
+        break unless matches? :comma
+      end
+      consume :right_paren, "Expect ')' after parameters."
+
+      # Have to consume the first part of the block since
+      # it assumes it's already been matched
+      consume :left_brace, 'Expect block after parameter list.'
+      body = block
+
+      Lox::AST::Statement::Function.new(name:, params: parameters, body:)
+    end
+
     def var_declaration
       name = consume :identifier, 'Expect variable name.'
       initializer = matches?(:equal) ? expression : nil
@@ -41,15 +69,19 @@ class Lox
       Lox::AST::Statement::Var.new(name:, initializer:)
     end
 
-    def statement # rubocop:disable Metrics/MethodLength
+    def statement # rubocop:disable Metrics/MethodLength,Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
       if matches? :for
         for_statement
       elsif matches? :if
         if_statement
       elsif matches? :print
         print_statement
+      elsif matches? :return
+        return_statement
       elsif matches? :while
         while_statement
+      elsif matches? :fun
+        function 'function'
       elsif matches? :left_brace
         Lox::AST::Statement::Block.new(statements: block)
       else
@@ -76,6 +108,15 @@ class Lox
       value = expression_list
       consume :semicolon, "Expect ';' after value."
       Lox::AST::Statement::Print.new(expression: value)
+    end
+
+    def return_statement
+      keyword = previous
+      value = nil
+      value = expression unless check :semicolon
+
+      consume :semicolon, "Expect ';' after return value."
+      Lox::AST::Statement::Return.new(keyword:, value:)
     end
 
     def if_statement
@@ -288,8 +329,31 @@ class Lox
 
         Lox::AST::Expression::Unary.new(operator:, right:)
       else
-        primary
+        function_call
       end
+    end
+
+    def function_call
+      expr = primary
+      loop do
+        break unless matches? :left_paren
+
+        expr = finish_call expr
+      end
+      expr
+    end
+
+    def finish_call(callee)
+      arguments = []
+      unless check :right_paren
+        loop do
+          error(peek, "Can't have more than 255 arguments.") if arguments.size > 255
+          arguments << expression
+          break unless matches? :comma
+        end
+      end
+      paren = consume :right_paren, "Expect ')' after arguments."
+      Lox::AST::Expression::Call.new(callee:, paren:, arguments:)
     end
 
     def primary # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
@@ -299,6 +363,8 @@ class Lox
         Lox::AST::Expression::Literal.new(value: true)
       elsif matches? :nil
         Lox::AST::Expression::Literal.new(value: nil)
+      elsif matches? :fun
+        function 'inline function'
       elsif matches? :number, :string
         Lox::AST::Expression::Literal.new(value: previous.literal)
       elsif matches? :break

@@ -17,7 +17,13 @@ class Lox
     end
 
     def []=(name, value)
-      @values[name.lexeme] = value
+      set name.lexeme, value
+    end
+
+    # Used to set a static association. For example:
+    #   env.set 'static_function_name', static_function
+    def set(name, value)
+      @values[name] = value
     end
 
     def exists?(name)
@@ -45,5 +51,7 @@ class Lox
         raise undefined_variable(name)
       end
     end
+
+    alias define []=
   end
 end

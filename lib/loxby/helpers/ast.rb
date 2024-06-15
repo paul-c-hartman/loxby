@@ -76,6 +76,7 @@ Lox::AST.define_ast(
     assign: [%i[token name], %i[expr value]],
     binary: [%i[expr left], %i[token operator], %i[expr right]],
     ternary: [%i[expr left], %i[token left_operator], %i[expr center], %i[token right_operator], %i[expr right]],
+    call: [%i[expr callee], %i[token paren], %i[expr_list arguments]],
     grouping: [%i[expr expression]],
     literal: [%i[object value]],
     logical: [%i[expr left], %i[token operator], %i[expr right]],
@@ -89,8 +90,10 @@ Lox::AST.define_ast(
   {
     block: [%i[stmt_list statements]],
     expression: [%i[expr expression]],
+    function: [%i[token name], %i[token_list params], %i[stmt_list body]],
     if: [%i[expr condition], %i[stmt then_branch], %i[stmt else_branch]],
     print: [%i[expr expression]],
+    return: [%i[token keyword], %i[expr value]],
     var: [%i[token name], %i[expr initializer]],
     while: [%i[expr condition], %i[stmt body]],
     break: []

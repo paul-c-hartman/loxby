@@ -2,14 +2,22 @@
 
 require_relative 'helpers/environment'
 require_relative 'helpers/errors'
+require_relative 'helpers/callable'
+require_relative 'helpers/native_functions'
+require_relative 'helpers/functions'
 require_relative 'visitors/base'
 
 # Interpreter class. Walks the AST using
 # the Visitor pattern.
 class Interpreter < Visitor
+  attr_reader :globals
+
   def initialize(process) # rubocop:disable Lint/MissingSuper
     @process = process
-    @environment = Lox::Environment.new
+    @globals = Lox::Environment.new
+    @environment = @globals # @env shifts around, but @globals stays the same always.
+
+    define_native_functions
   end
 
   def interpret(statements)
@@ -50,6 +58,12 @@ class Interpreter < Visitor
     lox_eval statement.expression
   end
 
+  def visit_function_statement(statement)
+    function = Lox::Function.new(statement, @environment)
+    @environment[statement.name] = function if statement.name
+    function
+  end
+
   def visit_if_statement(statement)
     if truthy? lox_eval(statement.condition)
       lox_eval statement.then_branch
@@ -61,6 +75,11 @@ class Interpreter < Visitor
   def visit_print_statement(statement)
     value = lox_eval statement.expression
     puts lox_obj_to_str(value)
+  end
+
+  def visit_return_statement(statement)
+    value = statement.value.nil? ? nil : lox_eval(statement.value)
+    throw :return, value
   end
 
   def visit_var_statement(statement)
@@ -95,11 +114,10 @@ class Interpreter < Visitor
   end
 
   def execute_block(statements, environment)
-    value = nil
     previous = @environment
     @environment = environment
-    statements.each { value = lox_eval _1 }
-    value
+    statements.each { lox_eval _1 }
+    nil
   rescue Lox::RunError
     nil
   ensure
@@ -185,5 +203,20 @@ class Interpreter < Visitor
     left = lox_eval expr.left
 
     left ? lox_eval(expr.center) : lox_eval(expr.right)
+  end
+
+  def visit_call_expression(expr) # rubocop:disable Metrics/AbcSize
+    callee = lox_eval expr.callee
+    arguments = expr.arguments.map { lox_eval _1 }
+
+    unless callee.class.include? Lox::Callable
+      raise Lox::RunError.new(expr.paren, 'Can only call functions and classes.')
+    end
+
+    unless arguments.size == callee.arity
+      raise Lox::RunError.new(expr.paren, "Expected #{callee.arity} arguments but got #{arguments.size}.")
+    end
+
+    callee.call(self, arguments)
   end
 end
