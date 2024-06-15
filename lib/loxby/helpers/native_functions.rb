@@ -12,7 +12,7 @@ class Interpreter < Visitor
       @arity = given_arity
     end
 
-    def call(interpreter, args) = @block.call(interpreter:, args:)
+    def call(interpreter, args) = @block.call(interpreter, args)
 
     def arity
       if @arity.respond_to? :call
@@ -28,8 +28,6 @@ class Interpreter < Visitor
   end
 
   def define_native_functions
-    @globals.set 'clock', NativeFunction.new(0) do |_interpreter:, _args:|
-      Time.now.to_i # Seconds since Epoch
-    end
+    @globals.set 'clock', NativeFunction.new(0) { |_interpreter, _args| Time.now.to_i.to_f }
   end
 end
