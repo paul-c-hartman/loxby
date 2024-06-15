@@ -4,7 +4,7 @@ require_relative 'lib/loxby/version'
 
 Gem::Specification.new do |s|
   s.name = 'loxby'
-  s.version = Loxby::VERSION
+  s.version = Lox::VERSION
   s.authors = ['Paul Hartman']
   s.email = ['real.paul.hartman@gmail.com']
 
