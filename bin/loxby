@@ -4,5 +4,5 @@
 require 'bundler/setup'
 require 'loxby/runner'
 
-# Start interpreter when run as script
-Lox::Runner.new.run(ARGV) if __FILE__ == $PROGRAM_NAME
+# Start interpreter
+Lox::Runner.new.run(ARGV)
