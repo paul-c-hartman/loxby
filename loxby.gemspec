@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
 
   s.metadata['homepage_uri'] = s.homepage
   s.metadata['source_code_uri'] = s.homepage
+  s.metadata['github_repo'] = s.homepage
 
   # Specify which files should be added to the gem when it is released.
   # `git ls-files -z` loads the files in the gem which git is tracking.
