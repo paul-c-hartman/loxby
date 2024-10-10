@@ -47,31 +47,19 @@ class Lox
       character = advance_character
 
       case character
+      # '/' is division, '//' is comment, '/* ... */'
+      # is block comment. Needs special care.
+      when '/'
+        if match('/') # comment line
+          advance_character until peek == "\n" || end_of_source?
+        elsif match('*') # block comment
+          scan_block_comment
+        else
+          add_token :slash
+        end
       # Single-character tokens
-      when '('
-        add_token :left_paren
-      when ')'
-        add_token :right_paren
-      when '{'
-        add_token :left_brace
-      when '}'
-        add_token :right_brace
-      when ','
-        add_token :comma
-      when '.'
-        add_token :dot
-      when '-'
-        add_token :minus
-      when '+'
-        add_token :plus
-      when ';'
-        add_token :semicolon
-      when '*'
-        add_token :star
-      when '?'
-        add_token :question
-      when ':'
-        add_token :colon
+      when Regexp.union(Lox::Token::SINGLE_TOKENS.keys)
+        add_token Lox::Token::SINGLE_TOKENS[character]
       # 1-2 character tokens
       when '!'
         add_token match('=') ? :bang_equal : :bang
@@ -81,16 +69,6 @@ class Lox
         add_token match('=') ? :less_equal : :less
       when '>'
         add_token match('=') ? :greater_equal : :greater
-      when '/'
-        # '/' is division, '//' is comment, '/* ... */'
-        # is block comment. Needs special care.
-        if match('/') # comment line
-          advance_character until peek == "\n" || end_of_source?
-        elsif match('*') # block comment
-          scan_block_comment
-        else
-          add_token :slash
-        end
       # Whitespace
       when "\n"
         @line += 1

@@ -41,7 +41,7 @@ class Lox
 
     setting :single_tokens,
             default: '(){},.-+;/*?:',
-            constructor: -> { Lox.config.token_types.tokens.zip(_1.split('')).to_h }
+            constructor: -> { _1.split('').zip(Lox.config.token_types.tokens).to_h }
   end
 
   setting :native_functions do
