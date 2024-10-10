@@ -1,34 +1,17 @@
 # frozen_string_literal: true
 
+require_relative '../config'
+
 class Lox
   # A single token. Emitted by
   # `Lox::Scanner` and consumed
   # by `Lox::Parser`.
   class Token
     # List of all token types.
-    TOKENS = [
-      # Single-character tokens.
-      :left_paren, :right_paren, :left_brace, :right_brace,
-      :comma, :dot, :minus, :plus, :semicolon, :slash, :star,
-      :question, :colon,
+    TOKENS = Lox.config.token_types.tokens
 
-      # 1-2 character tokens.
-      :bang, :bang_equal,
-      :equal, :equal_equal,
-      :greater, :greater_equal,
-      :less, :less_equal,
-
-      # Literals.
-      :identifier, :string, :number,
-
-      # Keywords.
-      :and, :class, :else, :false, :fun, :for, :if, :nil, :or,
-      :print, :return, :super, :this, :true, :var, :while, :break,
-
-      :eof
-    ].freeze
     # Map of single-character token types.
-    SINGLE_TOKENS = TOKENS.zip('(){},.-+;/*?:'.split('')).to_h
+    SINGLE_TOKENS = Lox.config.token_types.single_tokens
 
     attr_reader :type, :lexeme, :literal, :line
 

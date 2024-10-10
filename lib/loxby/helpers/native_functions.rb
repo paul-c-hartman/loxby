@@ -41,6 +41,8 @@ class Interpreter < Visitor
   end
 
   def define_native_functions
-    @globals.set 'clock', NativeFunction.new(0) { |_interpreter, _args| Time.now.to_i.to_f }
+    Lox.config.native_functions.values.each do |name, func|
+      @globals.set name.to_s, NativeFunction.new(func.arity, &func.block)
+    end
   end
 end

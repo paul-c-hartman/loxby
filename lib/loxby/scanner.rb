@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'helpers/token_type'
+require_relative 'config'
 
 class Lox
   # `Lox::Scanner` converts a string to
@@ -8,17 +9,12 @@ class Lox
   # `case` statement.
   class Scanner
     # Custom character classes for certain tokens.
-    EXPRESSIONS = {
-      whitespace: /\s/,
-      number_literal: /\d/,
-      identifier: /[a-zA-Z_]/
-    }.freeze
+    EXPRESSIONS = Lox.config.scanner.expressions.to_h
+
     # Map of keywords to token types.
     # Right now, all keywords have
     # their own token type.
-    KEYWORDS = %w[and class else false for fun if nil or print return super this true var while break]
-               .map { [_1, _1.to_sym] }
-               .to_h
+    KEYWORDS = Lox.config.scanner.keywords.map { [_1, _1.to_sym] }.to_h
 
     attr_accessor :line
 
