@@ -6,9 +6,9 @@ require 'open3'
 test_files = Dir[File.join __dir__, '*.lox'].to_a
 passed = 0
 failed = 0
-puts 'Running tests:'
-
 verbose = ARGV[0] == '--verbose'
+
+puts 'Running tests:'
 
 def run(file)
   values = []
@@ -26,6 +26,7 @@ test_files.each do |test_file|
     puts "bundle exec loxby #{test_file}"
   end
   out, code = *run(test_file)
+
   if code.exitstatus.zero?
     if verbose
       puts 'Test passed!'
@@ -46,6 +47,6 @@ test_files.each do |test_file|
   end
   puts "===\n\n" if verbose
 end
-puts
 
+puts
 puts "#{passed}/#{passed + failed} Passed"

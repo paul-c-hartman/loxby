@@ -14,8 +14,10 @@ class Interpreter < Visitor
 
   def initialize(process) # rubocop:disable Lint/MissingSuper
     @process = process
+    # `@globals` always refers to the same environment regardless of scope.
     @globals = Lox::Environment.new
-    @environment = @globals # @env shifts around, but @globals stays the same always.
+    # `@environment` changes based on scope.
+    @environment = @globals
 
     define_native_functions
   end
@@ -34,7 +36,7 @@ class Interpreter < Visitor
   end
 
   # Lox's definition of truthiness follows
-  # Ruby's by definition. This does nothing.
+  # Ruby's (for now), so this is a no-op (for now)
   def truthy?(obj)
     obj
   end
@@ -79,7 +81,7 @@ class Interpreter < Visitor
 
   def visit_return_statement(statement)
     value = statement.value.nil? ? nil : lox_eval(statement.value)
-    throw :return, value
+    throw :return, value # This is not an error, just sending a message up the callstack
   end
 
   def visit_var_statement(statement)
@@ -106,6 +108,8 @@ class Interpreter < Visitor
   end
 
   def visit_block_statement(statement)
+    # Pull out a copy of the environment
+    # so that blocks are closures
     execute_block(statement.statements, Lox::Environment.new(@environment))
   end
 
@@ -142,7 +146,7 @@ class Interpreter < Visitor
   end
 
   def visit_grouping_expression(expr)
-    lox_eval expr
+    lox_eval expr.expression
   end
 
   def visit_unary_expression(expr)

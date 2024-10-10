@@ -1,8 +1,11 @@
 AllCops:
-  TargetRubyVersion: 3.1.3
+  TargetRubyVersion: 3.3.5
 
 Metrics/ClassLength:
   Enabled: false
 
 Lint/BooleanSymbol:
+  Enabled: false
+
+Style/HashEachMethods:
   Enabled: false

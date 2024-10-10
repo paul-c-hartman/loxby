@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 
 ruby file: '.ruby-version'
 
-gem 'strscan'
-gemspec
+gem 'dry-configurable', '~> 1.0.0'
 gem 'rubocop', group: :development
+gem 'strscan'
+
+gemspec

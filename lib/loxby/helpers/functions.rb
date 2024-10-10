@@ -5,6 +5,10 @@ require_relative 'environment'
 require_relative '../interpreter'
 
 class Lox
+  # A 'Function' is a loxby function.
+  #
+  # You could manually instantiate one,
+  # but why would you?
   class Function
     include Callable
     attr_reader :declaration, :enclosure
@@ -21,7 +25,8 @@ class Lox
       end
 
       # Interpreter will `throw :return, return_value` to unwind
-      # callstack. We implicitly return that value.
+      # callstack, jumping out of the `catch` block. `catch` then
+      # implicitly returns that value.
       catch(:return) do
         interpreter.execute_block @declaration.body, env
         # If we get here, there was no return statement.

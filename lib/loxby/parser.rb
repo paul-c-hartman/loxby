@@ -4,11 +4,11 @@ require_relative 'helpers/ast'
 require_relative 'helpers/errors'
 
 class Lox
-  # Lox::Parser converts a list of tokens
-  # from Lox::Scanner to a syntax tree.
+  # `Lox::Parser` converts a list of tokens
+  # from `Lox::Scanner` to a syntax tree.
   # This tree can be interacted with using
-  # the Visitor pattern. (See the Visitor
-  # class in visitors/base.rb.)
+  # the Visitor pattern. (See `Visitor`
+  # in lib/visitors/base.rb.)
   class Parser
     def initialize(tokens, interpreter)
       @tokens = tokens
@@ -47,6 +47,7 @@ class Lox
       loop do
         break if check :right_paren
 
+        # This is mostly arbitrary but it keeps execution time down
         error(peek, "Can't have more than 255 parameters.") if parameters.size > 255
 
         parameters << consume(:identifier, 'Expect parameter name.')
@@ -142,6 +143,9 @@ class Lox
       Lox::AST::Statement::While.new(condition:, body:)
     end
 
+    # `for` loops in loxby are syntactic sugar
+    # for `while` loops. Yay!
+
     def for_statement # rubocop:disable Metrics/MethodLength,Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
       consume :left_paren, "Expect '(' after 'for'."
 
@@ -218,7 +222,7 @@ class Lox
       if matches? :question
         left_operator = previous
         center = check(:colon) ? Lox::AST::Expression::Literal.new(value: nil) : expression_list
-        consume :colon, "Expect ':' after expression (ternary operator)."
+        consume :colon, "Expect ':' after expression: incomplete ternary operator."
         right_operator = previous
         right = conditional # Recurse, right-associative
         expr = Lox::AST::Expression::Ternary.new(left: expr, left_operator:, center:, right_operator:, right:)
@@ -382,6 +386,7 @@ class Lox
         raise err
       elsif matches? :question
         err = error(previous, 'Expect expression before ternary operator.')
+        # Parse and throw away
         expression_list
         consume :colon, "Expect ':' after '?' (ternary operator)."
         conditional

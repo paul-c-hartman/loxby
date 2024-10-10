@@ -1,17 +1,20 @@
 # frozen_string_literal: true
 
 require_relative 'helpers/token_type'
+require_relative 'config'
 
 class Lox
+  # `Lox::Scanner` converts a string to
+  # a series of tokens using a giant
+  # `case` statement.
   class Scanner
-    EXPRESSIONS = {
-      whitespace: /\s/,
-      number_literal: /\d/,
-      identifier: /[a-zA-Z_]/
-    }.freeze
-    KEYWORDS = %w[and class else false for fun if nil or print return super this true var while break]
-               .map { [_1, _1.to_sym] }
-               .to_h
+    # Custom character classes for certain tokens.
+    EXPRESSIONS = Lox.config.scanner.expressions.to_h
+
+    # Map of keywords to token types.
+    # Right now, all keywords have
+    # their own token type.
+    KEYWORDS = Lox.config.scanner.keywords.map { [_1, _1.to_sym] }.to_h
 
     attr_accessor :line
 
@@ -25,6 +28,8 @@ class Lox
       @line = 1
     end
 
+    # Process text source into
+    # a list of tokens.
     def scan_tokens
       until end_of_source?
         # Beginnning of next lexeme
@@ -33,38 +38,28 @@ class Lox
       end
 
       # Implicitly return @tokens
-      @tokens << Lox::Token.new(:eof, "", nil, @line)
+      @tokens << Lox::Token.new(:eof, '', nil, @line)
     end
+
+    # Consume enough characters for the next token.
 
     def scan_token # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       character = advance_character
 
       case character
+      # '/' is division, '//' is comment, '/* ... */'
+      # is block comment. Needs special care.
+      when '/'
+        if match('/') # comment line
+          advance_character until peek == "\n" || end_of_source?
+        elsif match('*') # block comment
+          scan_block_comment
+        else
+          add_token :slash
+        end
       # Single-character tokens
-      when '('
-        add_token :left_paren
-      when ')'
-        add_token :right_paren
-      when '{'
-        add_token :left_brace
-      when '}'
-        add_token :right_brace
-      when ','
-        add_token :comma
-      when '.'
-        add_token :dot
-      when '-'
-        add_token :minus
-      when '+'
-        add_token :plus
-      when ';'
-        add_token :semicolon
-      when '*'
-        add_token :star
-      when '?'
-        add_token :question
-      when ':'
-        add_token :colon
+      when Regexp.union(Lox::Token::SINGLE_TOKENS.keys)
+        add_token Lox::Token::SINGLE_TOKENS[character]
       # 1-2 character tokens
       when '!'
         add_token match('=') ? :bang_equal : :bang
@@ -74,16 +69,6 @@ class Lox
         add_token match('=') ? :less_equal : :less
       when '>'
         add_token match('=') ? :greater_equal : :greater
-      when '/'
-        # '/' is division, '//' is comment, '/* ... */'
-        # is block comment. Needs special care.
-        if match('/') # comment line
-          advance_character until peek == "\n" || end_of_source?
-        elsif match('*') # block comment
-          scan_block_comment
-        else
-          add_token :slash
-        end
       # Whitespace
       when "\n"
         @line += 1
@@ -105,7 +90,7 @@ class Lox
     def scan_block_comment # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       advance_character until (peek == '*' && peek_next == '/') || (peek == '/' && peek_next == '*') || end_of_source?
 
-      if end_of_source? || peek_next == "\0"
+      if end_of_source? || peek_next == "\0" # If 0 or 1 characters are left
         @interpreter.error(line, 'Unterminated block comment.')
         return
       elsif peek == '/' && peek_next == '*'
@@ -123,7 +108,7 @@ class Lox
 
     def scan_string # rubocop:disable Metrics/MethodLength
       until peek == '"' || end_of_source?
-        @line += 1 if peek == "\n"
+        @line += 1 if peek == "\n" # Multiline strings are valid
         advance_character
       end
 
@@ -159,17 +144,20 @@ class Lox
       add_token(KEYWORDS[text] || :identifier)
     end
 
+    # Move the pointer ahead one character and return it.
     def advance_character
       character = @source[@current]
       @current += 1
       character
     end
 
+    # Emit a token.
     def add_token(type, literal = nil)
       text = @source[@start...@current]
       @tokens << Lox::Token.new(type, text, literal, @line)
     end
 
+    # Move the pointer ahead if character matches expected character; error otherwise.
     def match(expected)
       return false unless @source[@current] == expected || end_of_source?
 

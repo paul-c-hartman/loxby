@@ -2,6 +2,8 @@
 
 require_relative 'base'
 
+# This visitor prints a given AST
+# for easier viewing and debugging.
 class ASTPrinter < Visitor
   def print(expression)
     expression.accept self
@@ -33,5 +35,21 @@ class ASTPrinter < Visitor
 
   def visit_unary_expression(expr)
     parenthesize expr.operator.lexeme, expr.right
+  end
+
+  def visit_assign_expression(expr)
+    parenthesize 'assign', expr.name, expr.value
+  end
+
+  def visit_call_expression(expr)
+    parenthesize 'call', expr.callee, expr.arguments
+  end
+
+  def visit_logical_expression(expr)
+    visit_binary_expression(expr)
+  end
+
+  def visit_variable_expression(expr)
+    parenthesize 'var', expr.name
   end
 end

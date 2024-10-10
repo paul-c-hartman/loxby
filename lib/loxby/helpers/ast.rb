@@ -16,17 +16,22 @@ end
 
 class Lox
   # Interface:
+  # ```ruby
   #   Lox::AST.define_ast(
   #     "ASTBaseClass",
   #     {
-  #       :ast_type => [[:field_one_type, :field_one_name], [:field_two_type, :field_two_name]],
+  #       :ast_type => [
+  #         [:field_one_type, :field_one_name],
+  #         [:field_two_type, :field_two_name]
+  #       ],
   #       :other_ast_type => [[:field_type, :field_name]]
   #     }
   #   )
+  # ```
   #
-  # This defines Lox::AST::ASTBaseClass, which ::AstType and ::OtherAstType descend from
-  # and are scoped under. It also defines the Visitor pattern: AstType defines #accept(visitor),
-  # which calls `visitor.visit_ast_type(self)`
+  # This call to `#define_ast` generates `Lox::AST::ASTBaseClass`, as well as `::AstType` and
+  # `::OtherAstType` descending from and scoped uner it. Generated classes follow the Visitor
+  # pattern: `::AstType` generates with `#accept(visitor)` which calls `visitor.visit_ast_type(self)`.
   module AST
     module_function
 
@@ -54,8 +59,8 @@ class Lox
           #{parameters.map { "@#{_1}" }.join(', ')}#{parameters.empty? ? '' : ' = '}#{parameters.join ', '}
         end
 
-        # Dynamically generated for visitor pattern.
-        # Expects visitor to define #visit_#{subtype_name}
+        # This function was dynamically generated for visitor pattern.
+        # Expects visitors to define `#visit_#{subtype_name}_#{base_class_name}`.
         def accept(visitor)
           visitor.visit_#{subtype_name}_#{base_class_name}(self)
         end
@@ -70,32 +75,7 @@ class Lox
   end
 end
 
-Lox::AST.define_ast(
-  :expression,
-  {
-    assign: [%i[token name], %i[expr value]],
-    binary: [%i[expr left], %i[token operator], %i[expr right]],
-    ternary: [%i[expr left], %i[token left_operator], %i[expr center], %i[token right_operator], %i[expr right]],
-    call: [%i[expr callee], %i[token paren], %i[expr_list arguments]],
-    grouping: [%i[expr expression]],
-    literal: [%i[object value]],
-    logical: [%i[expr left], %i[token operator], %i[expr right]],
-    unary: [%i[token operator], %i[expr right]],
-    variable: [%i[token name]]
-  }
-)
-
-Lox::AST.define_ast(
-  :statement,
-  {
-    block: [%i[stmt_list statements]],
-    expression: [%i[expr expression]],
-    function: [%i[token name], %i[token_list params], %i[stmt_list body]],
-    if: [%i[expr condition], %i[stmt then_branch], %i[stmt else_branch]],
-    print: [%i[expr expression]],
-    return: [%i[token keyword], %i[expr value]],
-    var: [%i[token name], %i[expr initializer]],
-    while: [%i[expr condition], %i[stmt body]],
-    break: []
-  }
-)
+# Default AST specification for loxby.
+Lox.config.ast.values.each do |name, definition|
+  Lox::AST.define_ast(name, definition)
+end

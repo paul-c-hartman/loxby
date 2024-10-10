@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Visitable adds #accept, the only
+# Visitable adds `#accept`, the only
 # method required to implement the
 # visitor pattern on a class.
 # To use the visitor pattern,
