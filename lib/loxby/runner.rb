@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../loxby'
+require_relative 'config'
 
 class Lox
   # `Lox::Runner` is the interactive runner
@@ -14,7 +15,7 @@ class Lox
       # Exit cleanly. 130 is for interrupted scripts
       trap('INT') do
         puts
-        exit 130
+        exit Lox.config.exit_code.interrupt
       end
 
       @interpreter = Lox.new
@@ -24,8 +25,8 @@ class Lox
 
     def run(args)
       if args.size > 1
-        @out.puts 'Usage: loxby.rb [script]'
-        exit 64
+        @out.puts 'Usage: loxby [script]'
+        exit Lox.config.exit_code.usage
       elsif args.size == 1
         @interpreter.run_file args[0]
       else

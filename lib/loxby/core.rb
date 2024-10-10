@@ -4,6 +4,7 @@ require_relative 'scanner'
 require_relative 'parser'
 require_relative 'interpreter'
 require_relative 'helpers/token_type'
+require_relative 'config'
 
 # Lox interpreter.
 # Each interpreter keeps track of its own
@@ -28,8 +29,8 @@ class Lox
     else
       report(0, '', "No such file: '#{path}'")
     end
-    exit(65) if @errored # Don't execute malformed code
-    exit(70) if @errored_in_runtime
+    exit Lox.config.exit_code.syntax_error if @errored # Don't execute malformed code
+    exit Lox.config.exit_code.runtime_error if @errored_in_runtime
   end
 
   # Run interactively, REPL-style
