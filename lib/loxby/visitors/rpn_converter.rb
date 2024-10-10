@@ -2,6 +2,8 @@
 
 require_relative 'base'
 
+# This visitor converts single expression
+# ASTs to Reverse Polish Notation.
 class RPNConverter < Visitor
   def print(expr)
     expr.accept self

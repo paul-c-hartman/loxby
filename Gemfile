@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 
 ruby file: '.ruby-version'
 
-gem 'strscan'
-gemspec
 gem 'rubocop', group: :development
+gem 'strscan'
+
+gemspec

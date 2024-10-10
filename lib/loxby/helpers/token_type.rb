@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
 class Lox
+  # A single token. Emitted by
+  # `Lox::Scanner` and consumed
+  # by `Lox::Parser`.
   class Token
+    # List of all token types.
     TOKENS = [
       # Single-character tokens.
       :left_paren, :right_paren, :left_brace, :right_brace,
@@ -23,7 +27,8 @@ class Lox
 
       :eof
     ].freeze
-    SINGLE_TOKENS = TOKENS.zip('(){},.-+;/*'.split('')).to_h
+    # Map of single-character token types.
+    SINGLE_TOKENS = TOKENS.zip('(){},.-+;/*?:'.split('')).to_h
 
     attr_reader :type, :lexeme, :literal, :line
 

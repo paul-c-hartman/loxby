@@ -3,13 +3,20 @@
 require_relative '../loxby'
 
 class Lox
-  # Lox::Runner is the interactive runner
+  # `Lox::Runner` is the interactive runner
   # which kickstarts the interpreter.
   # An instance is created when loxby is
-  # initialized from the command line.
+  # initialized from the command line,
+  # though it can be instantiated from
+  # code as well.
   class Runner
     def initialize(out = $stdout, err = $stderr)
-      trap('INT') { exit 130 } # Exit cleanly. 130 is for interrupted scripts
+      # Exit cleanly. 130 is for interrupted scripts
+      trap('INT') do
+        puts
+        exit 130
+      end
+
       @interpreter = Lox.new
       @out = out
       @err = err

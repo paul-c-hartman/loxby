@@ -3,9 +3,8 @@
 require_relative 'errors'
 
 class Lox
-  # Lox::Environment stores namespace for
-  # a Lox interpreter. Environments can be
-  # nested (for scope).
+  # Stores namespaces for a Lox interpreter.
+  # Environments can be nested (for scope).
   class Environment
     def initialize(enclosing = nil)
       @enclosing = enclosing
@@ -26,14 +25,16 @@ class Lox
       @values[name] = value
     end
 
-    def exists?(name)
+    def declared?(name)
+      # We can't check for a dummy value
+      # since loxby uses `nil` as well
       @values.keys.member? name.lexeme
     end
 
     def [](name)
       if @values[name.lexeme]
         @values[name.lexeme]
-      elsif exists? name
+      elsif declared? name
         raise Lox::RunError.new(name, "Declared variable not initialized: '#{name.lexeme}'")
       elsif @enclosing
         @enclosing[name]
@@ -43,7 +44,7 @@ class Lox
     end
 
     def assign(name, value)
-      if exists? name
+      if declared? name
         self[name] = value
       elsif @enclosing
         @enclosing.assign(name, value)

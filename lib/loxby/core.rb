@@ -13,12 +13,15 @@ class Lox
   attr_reader :errored, :interpreter
 
   def initialize
+    # Whether an error occurred while parsing.
     @errored = false
+    # Whether an error occurred while interpreting
     @errored_in_runtime = false
-    @interpreter = Interpreter.new(self) # Make static so REPL sessions reuse it
+    # `Lox::Interpreter` instance. Static so interactive sessions reuse it
+    @interpreter = Interpreter.new(self)
   end
 
-  # Run from file
+  # Parse and run a file
   def run_file(path)
     if File.exist? path
       run File.read(path)
@@ -29,7 +32,7 @@ class Lox
     exit(70) if @errored_in_runtime
   end
 
-  # Run interactively
+  # Run interactively, REPL-style
   def run_prompt
     loop do
       print '> '
@@ -38,11 +41,13 @@ class Lox
 
       result = run(line)
       puts "=> #{@interpreter.lox_obj_to_str result}" unless @errored
-      @errored = false # Reset so a mistake doesn't kill the repl
+
+      # When run interactively, resets after every prompt so as to not kill the repl
+      @errored = false
     end
   end
 
-  # Run a string
+  # Parse and run a string
   def run(source)
     tokens = Scanner.new(source, self).scan_tokens
     parser = Parser.new(tokens, self)

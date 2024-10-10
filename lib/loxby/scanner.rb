@@ -3,12 +3,19 @@
 require_relative 'helpers/token_type'
 
 class Lox
+  # `Lox::Scanner` converts a string to
+  # a series of tokens using a giant
+  # `case` statement.
   class Scanner
+    # Custom character classes for certain tokens.
     EXPRESSIONS = {
       whitespace: /\s/,
       number_literal: /\d/,
       identifier: /[a-zA-Z_]/
     }.freeze
+    # Map of keywords to token types.
+    # Right now, all keywords have
+    # their own token type.
     KEYWORDS = %w[and class else false for fun if nil or print return super this true var while break]
                .map { [_1, _1.to_sym] }
                .to_h
@@ -25,6 +32,8 @@ class Lox
       @line = 1
     end
 
+    # Process text source into
+    # a list of tokens.
     def scan_tokens
       until end_of_source?
         # Beginnning of next lexeme
@@ -33,8 +42,10 @@ class Lox
       end
 
       # Implicitly return @tokens
-      @tokens << Lox::Token.new(:eof, "", nil, @line)
+      @tokens << Lox::Token.new(:eof, '', nil, @line)
     end
+
+    # Consume enough characters for the next token.
 
     def scan_token # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       character = advance_character
@@ -105,7 +116,7 @@ class Lox
     def scan_block_comment # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       advance_character until (peek == '*' && peek_next == '/') || (peek == '/' && peek_next == '*') || end_of_source?
 
-      if end_of_source? || peek_next == "\0"
+      if end_of_source? || peek_next == "\0" # If 0 or 1 characters are left
         @interpreter.error(line, 'Unterminated block comment.')
         return
       elsif peek == '/' && peek_next == '*'
@@ -123,7 +134,7 @@ class Lox
 
     def scan_string # rubocop:disable Metrics/MethodLength
       until peek == '"' || end_of_source?
-        @line += 1 if peek == "\n"
+        @line += 1 if peek == "\n" # Multiline strings are valid
         advance_character
       end
 
@@ -159,17 +170,20 @@ class Lox
       add_token(KEYWORDS[text] || :identifier)
     end
 
+    # Move the pointer ahead one character and return it.
     def advance_character
       character = @source[@current]
       @current += 1
       character
     end
 
+    # Emit a token.
     def add_token(type, literal = nil)
       text = @source[@start...@current]
       @tokens << Lox::Token.new(type, text, literal, @line)
     end
 
+    # Move the pointer ahead if character matches expected character; error otherwise.
     def match(expected)
       return false unless @source[@current] == expected || end_of_source?
 

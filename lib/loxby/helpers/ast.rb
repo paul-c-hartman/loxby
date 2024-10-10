@@ -16,17 +16,22 @@ end
 
 class Lox
   # Interface:
+  # ```ruby
   #   Lox::AST.define_ast(
   #     "ASTBaseClass",
   #     {
-  #       :ast_type => [[:field_one_type, :field_one_name], [:field_two_type, :field_two_name]],
+  #       :ast_type => [
+  #         [:field_one_type, :field_one_name],
+  #         [:field_two_type, :field_two_name]
+  #       ],
   #       :other_ast_type => [[:field_type, :field_name]]
   #     }
   #   )
+  # ```
   #
-  # This defines Lox::AST::ASTBaseClass, which ::AstType and ::OtherAstType descend from
-  # and are scoped under. It also defines the Visitor pattern: AstType defines #accept(visitor),
-  # which calls `visitor.visit_ast_type(self)`
+  # This call to `#define_ast` generates `Lox::AST::ASTBaseClass`, as well as `::AstType` and
+  # `::OtherAstType` descending from and scoped uner it. Generated classes follow the Visitor
+  # pattern: `::AstType` generates with `#accept(visitor)` which calls `visitor.visit_ast_type(self)`.
   module AST
     module_function
 
@@ -54,8 +59,8 @@ class Lox
           #{parameters.map { "@#{_1}" }.join(', ')}#{parameters.empty? ? '' : ' = '}#{parameters.join ', '}
         end
 
-        # Dynamically generated for visitor pattern.
-        # Expects visitor to define #visit_#{subtype_name}
+        # This function was dynamically generated for visitor pattern.
+        # Expects visitors to define `#visit_#{subtype_name}_#{base_class_name}`.
         def accept(visitor)
           visitor.visit_#{subtype_name}_#{base_class_name}(self)
         end
@@ -70,6 +75,9 @@ class Lox
   end
 end
 
+# Default AST specification for loxby.
+
+# Expressions
 Lox::AST.define_ast(
   :expression,
   {
@@ -85,6 +93,7 @@ Lox::AST.define_ast(
   }
 )
 
+# Statements
 Lox::AST.define_ast(
   :statement,
   {

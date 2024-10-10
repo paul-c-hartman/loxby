@@ -2,6 +2,8 @@
 
 require_relative 'base'
 
+# This visitor prints a given AST
+# for easier viewing and debugging.
 class ASTPrinter < Visitor
   def print(expression)
     expression.accept self

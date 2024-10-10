@@ -5,6 +5,19 @@ require_relative 'callable'
 require_relative '../visitors/base'
 
 class Interpreter < Visitor
+  # A `NativeFunction` is a loxby function
+  # which references a callable Ruby
+  # object (block, proc, method, etc.).
+  #
+  # For example:
+  # ```ruby
+  # @environment.set(
+  #   'clock',
+  #   NativeFunction.new(0) do |_interpreter, _args|
+  #     Time.now.to_i.to_f
+  #   end
+  # )
+  # ```
   class NativeFunction
     include Lox::Callable
     def initialize(given_arity = 0, &block)
