@@ -6,3 +6,6 @@ Metrics/ClassLength:
 
 Lint/BooleanSymbol:
   Enabled: false
+
+Style/HashEachMethods:
+  Enabled: false
