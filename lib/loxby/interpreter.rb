@@ -142,7 +142,7 @@ class Interpreter < Visitor
   end
 
   def visit_grouping_expression(expr)
-    lox_eval expr
+    lox_eval expr.expression
   end
 
   def visit_unary_expression(expr)
