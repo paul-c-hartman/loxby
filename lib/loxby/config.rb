@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'dry-configurable'
+require_relative 'helpers/errors'
 
 class Lox # rubocop:disable Style/Documentation
   extend Dry::Configurable
@@ -48,6 +49,10 @@ class Lox # rubocop:disable Style/Documentation
     setting :clock do
       setting :arity, default: 0
       setting :block, default: ->(_, _) { Time.now.to_i.to_f }
+    end
+    setting :exit do
+      setting :arity, default: 0
+      setting :block, default: ->(_, _) { throw :lox_exit }
     end
   end
 

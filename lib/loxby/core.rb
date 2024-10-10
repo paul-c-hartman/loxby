@@ -25,7 +25,9 @@ class Lox
   # Parse and run a file
   def run_file(path)
     if File.exist? path
-      run File.read(path)
+      catch(:lox_exit) do
+        run File.read(path)
+      end
     else
       report(0, '', "No such file: '#{path}'")
     end
@@ -35,16 +37,18 @@ class Lox
 
   # Run interactively, REPL-style
   def run_prompt
-    loop do
-      print '> '
-      line = gets
-      break unless line # Trap eof (Ctrl+D unix, Ctrl+Z win)
+    catch(:lox_exit) do
+      loop do
+        print '> '
+        line = gets
+        break unless line # Trap eof (Ctrl+D unix, Ctrl+Z win)
 
-      result = run(line)
-      puts "=> #{@interpreter.lox_obj_to_str result}" unless @errored
+        result = run(line)
+        puts "=> #{@interpreter.lox_obj_to_str result}" unless @errored
 
-      # When run interactively, resets after every prompt so as to not kill the repl
-      @errored = false
+        # When run interactively, resets after every prompt so as to not kill the repl
+        @errored = false
+      end
     end
   end
 
