@@ -2,7 +2,7 @@
 
 require 'dry-configurable'
 
-class Lox
+class Lox # rubocop:disable Style/Documentation
   extend Dry::Configurable
 
   setting :scanner do

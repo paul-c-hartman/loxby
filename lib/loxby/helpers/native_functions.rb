@@ -4,7 +4,7 @@ require_relative '../interpreter'
 require_relative 'callable'
 require_relative '../visitors/base'
 
-class Interpreter < Visitor
+class Interpreter < Visitor # rubocop:disable Style/Documentation
   # A `NativeFunction` is a loxby function
   # which references a callable Ruby
   # object (block, proc, method, etc.).
