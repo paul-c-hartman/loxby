@@ -45,16 +45,7 @@ class Lox # rubocop:disable Style/Documentation
             constructor: -> { _1.split('').zip(Lox.config.token_types.tokens).to_h }
   end
 
-  setting :native_functions do
-    setting :clock do
-      setting :arity, default: 0
-      setting :block, default: ->(_, _) { Time.now.to_i.to_f }
-    end
-    setting :exit do
-      setting :arity, default: 0
-      setting :block, default: ->(_, _) { throw :lox_exit }
-    end
-  end
+  setting :native_functions, default: [], reader: true
 
   setting :ast do
     setting :expression,

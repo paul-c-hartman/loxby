@@ -40,9 +40,36 @@ class Interpreter < Visitor # rubocop:disable Style/Documentation
     end
   end
 
+  # Native extension interface for Loxby.
+  #
+  # For example, to extend the base
+  # interpreter directly:
+  #
+  # ```ruby
+  # require 'loxby/interpreter'
+  # require 'loxby/helpers/native_functions'
+  # Interpreter.native_function(:greet, arity: 1) { |_interpreter, args| puts "Hello #{args[0]}!" }
+  # ```
+  #
+  # Or inside a modified interpreter:
+  # ```ruby
+  # require 'loxby/interpreter'
+  # require 'loxby/helpers/native_functions'
+  # class MyInterpreter < Interpreter
+  #   ...
+  #   native_function :greet, arity: 1, &->(_interpreter, args) { puts "Hello #{args[0]}!" }
+  # end
+  # ```
+  def self.native_function(name, arity:, &block)
+    Lox.native_functions << { name:, arity:, block: }
+  end
+
   def define_native_functions
-    Lox.config.native_functions.values.each do |name, func|
-      @globals.set name.to_s, NativeFunction.new(func.arity, &func.block)
+    Lox.native_functions.each do |func|
+      @globals.set func[:name].to_s, NativeFunction.new(func[:arity], &func[:block])
     end
   end
+
+  native_function :clock, arity: 0, &->(_int, _args) { Time.now.to_i.to_f }
+  native_function :exit, arity: 0, &->(_int, _args) { throw :lox_exit }
 end

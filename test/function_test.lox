@@ -3,3 +3,6 @@ fun sayHi(first, last) {
 }
 
 sayHi("Dear", "Reader");
+
+print("Time: ");
+print(clock());
