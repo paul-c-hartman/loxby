@@ -70,6 +70,6 @@ class Interpreter < Visitor # rubocop:disable Style/Documentation
     end
   end
 
-  native_function :clock, arity: 0, &->(_int, _args) { Time.now.to_i.to_f }
+  native_function :clock, arity: 0, &->(_int, _args) { Time.now.to_f }
   native_function :exit, arity: 0, &->(_int, _args) { throw :lox_exit }
 end
