@@ -18,16 +18,29 @@ class Lox
     end
 
     def parse
-      statements = []
-      statements << declaration until end_of_input?
-      statements
+      @statements = []
+      @statements << declaration until end_of_input?
+      @statements
     end
 
     def declaration
       if matches? :fun
         function 'function'
+        # primary
       elsif matches? :var
         var_declaration
+      elsif check :semicolon
+        # Yay edge cases! Either there's an extra semicolon or
+        # someone put a function definition in an expression statement.
+        # Which is valid (though look at this gross surgery to get it
+        # to work) while extra semicolons are not.
+        if @statements[-1].is_a? Lox::AST::Statement::Function
+          advance
+          Lox::AST::Statement::Expression.new(expression: @statements.pop)
+        end
+
+        # If it's not a function-in-expression-statement, control flow
+        # calls `statement`, which errors as intended.
       else
         statement
       end
@@ -432,6 +445,7 @@ class Lox
     # We're skipping possibly erroneous tokens
     # to prevent cascading errors.
     def synchronize
+      puts 'entered panic mode'
       advance
 
       until end_of_input?
