@@ -1,16 +1,12 @@
 # frozen_string_literal: true
 
+require 'minitest/autorun'
 require 'English'
 require 'open3'
 
-test_files = Dir[File.join __dir__, '*.lox'].to_a
-passed = 0
-failed = 0
-verbose = ARGV[0] == '--verbose'
-
 puts 'Running tests:'
 
-def run(file)
+def run_lox_file(file)
   values = []
   Open3.popen2e("bundle exec loxby \"#{file}\"") do |_stdin, stdout_and_stderr, wait_thr|
     values << stdout_and_stderr.read
@@ -19,34 +15,14 @@ def run(file)
   values
 end
 
-test_files.each do |test_file|
-  if verbose
-    puts '==='
-    puts "Running #{File.basename test_file}:"
-    puts "bundle exec loxby #{test_file}"
-  end
-  out, code = *run(test_file)
-
-  if code.exitstatus.zero?
-    if verbose
-      puts 'Test passed!'
-    else
-      print '.'
+class LoxTest < Minitest::Test
+  lox_tests = Dir[File.join __dir__, '*.lox'].to_a
+  lox_tests.each do |test_file|
+    test_name = File.basename(test_file, '.lox')
+    define_method :"test_lox_#{test_name}" do
+      out = run_lox_file(test_file)
+      output, exit_code = *out
+      assert_equal exit_code, 0, "Test output:\n\n================\n#{output}\n================\n\n"
     end
-    passed += 1
-  else
-    if verbose
-      puts 'Test failed:'
-      puts '---'
-      puts out
-      puts '---'
-    else
-      print 'x'
-    end
-    failed += 1
   end
-  puts "===\n\n" if verbose
 end
-
-puts
-puts "#{passed}/#{passed + failed} Passed"
