@@ -13,5 +13,5 @@ thrice(fun (a) {
 
 var a = fun () {};
 var b = fun () { return fun () {}; };
-print a();
-print b()();
+print a(); // "nil".
+print b()(); // "nil".
