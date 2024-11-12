@@ -22,7 +22,7 @@ class Lox # rubocop:disable Style/Documentation
       # Single-character tokens.
       :left_paren, :right_paren, :left_brace, :right_brace,
       :comma, :dot, :minus, :plus, :semicolon, :slash, :star,
-      :question, :colon,
+      :question, :colon, :percent,
 
       # 1-2 character tokens.
       :bang, :bang_equal,
@@ -41,7 +41,7 @@ class Lox # rubocop:disable Style/Documentation
     ].freeze
 
     setting :single_tokens,
-            default: '(){},.-+;/*?:',
+            default: '(){},.-+;/*?:%',
             constructor: -> { _1.split('').zip(Lox.config.token_types.tokens).to_h }
   end
 
