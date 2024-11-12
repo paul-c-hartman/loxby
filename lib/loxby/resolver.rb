@@ -13,17 +13,18 @@ class Resolver < Visitor
     @scopes = []
   end
 
-  def resolve(statement_or_expression)
+  def resolve(*statements_or_expressions)
     # Visit node
-    statement_or_expression.accept self
+    statements_or_expressions.flatten.each { _1.accept self }
   end
 
   def resolve_local(expr, name)
     @scopes.each.with_index.reverse_each do |scope, index|
-      if scope.keys.include? name.lexeme
-        @interpreter.resolve(expr, @scopes.size - 1 - index)
-        break
-      end
+      next unless scope.keys.include? name.lexeme
+
+      depth = @scopes.size - 1 - index
+      @interpreter.resolve(expr, depth)
+      break
     end
   end
 
@@ -38,7 +39,7 @@ class Resolver < Visitor
   end
 
   def begin_scope
-    @scopes.push {}
+    @scopes << ({})
   end
 
   def end_scope
@@ -46,14 +47,15 @@ class Resolver < Visitor
   end
 
   def declare(name)
-    return if @scopes.empty?
+    return if @scopes.empty? || name.nil? || name.lexeme.empty?
 
     scope = @scopes.last
     scope[name.lexeme] = false
   end
 
   def define(name)
-    return if @scopes.empty?
+    scope = @scopes.last
+    return if @scopes.empty? || scope[name.lexeme].nil?
 
     scope[name.lexeme] = true
   end
@@ -134,8 +136,8 @@ class Resolver < Visitor
   end
 
   def visit_variable_expression(expr)
-    unless @scopes.empty? || @scopes.last[expr.name.lexeme]
-      @interpreter.error(expr.name, "Can't read local variable in its own initializer.")
+    if !@scopes.empty? && @scopes.last[expr.name.lexeme] == false
+      @interpreter.process.error(expr.name, "Can't read local variable in its own initializer.")
     end
 
     resolve_local(expr, expr.name)
