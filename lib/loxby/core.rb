@@ -2,6 +2,7 @@
 
 require_relative 'scanner'
 require_relative 'parser'
+require_relative 'resolver'
 require_relative 'interpreter'
 require_relative 'helpers/token_type'
 require_relative 'config'
@@ -59,6 +60,10 @@ class Lox
     statements = parser.parse
     return if @errored
 
+    resolver = Resolver.new(@interpreter)
+    # No need to store output as this injects data
+    # directly into the interpreter
+    resolver.resolve statements
     @interpreter.interpret statements
   end
 

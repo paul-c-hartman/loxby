@@ -6,6 +6,8 @@ class Lox
   # Stores namespaces for a Lox interpreter.
   # Environments can be nested (for scope).
   class Environment
+    attr_reader :enclosing, :values
+
     def initialize(enclosing = nil)
       @enclosing = enclosing
       @values = {}
@@ -31,6 +33,14 @@ class Lox
       @values.keys.member? name.lexeme
     end
 
+    def get_at(distance, name)
+      ancestor(distance).values[name]
+    end
+
+    def assign_at(distance, name, value)
+      ancestor(distance).values[name] = value
+    end
+
     def [](name)
       if @values[name.lexeme]
         @values[name.lexeme]
@@ -41,6 +51,12 @@ class Lox
       else
         raise undefined_variable(name)
       end
+    end
+
+    def ancestor(distance)
+      env = self
+      distance.times { env = env.enclosing }
+      env
     end
 
     def assign(name, value)

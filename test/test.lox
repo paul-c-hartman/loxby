@@ -4,6 +4,6 @@ print 2 + 1;
 
 var a = 1;
 {
-  var a = a + 2;
-  print a;
+  var b = a + 2;
+  print b;
 }

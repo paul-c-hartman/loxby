@@ -72,4 +72,17 @@ class Interpreter < Visitor # rubocop:disable Style/Documentation
 
   native_function :clock, arity: 0, &->(_int, _args) { Time.now.to_f }
   native_function :exit, arity: 0, &->(_int, _args) { throw :lox_exit }
+  native_function(:_inspectLocalScope, arity: 0) do |interpreter, _args|
+    puts <<~OUT
+      ~~~~
+      LOCAL SCOPE INSPECTOR
+      ====
+      Found by resolver:
+      #{interpreter.instance_variable_get(:@locals).map { "#{_1.lexeme}: #{interpreter.environment.get_at(@locals[_1], _1.lexeme)}" }.join("\n")}
+      ====
+      Found in globals:
+      #{interpreter.globals.values.map { |name, value| "#{name}: #{value}" }.join("\n")}
+      ~~~~
+    OUT
+  end
 end
