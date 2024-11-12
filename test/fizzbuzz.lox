@@ -1,0 +1,11 @@
+fun fizzBuzz(limit) {
+  for (var i = 1; i <= limit; i = i + 1) {
+    var out = "";
+    if (i % 3 == 0) out = "Fizz";
+    if (i % 5 == 0) out = out + "Buzz";
+    if (i % 3 != 0 and i % 5 != 0) out = i;
+    print(out);
+  }
+}
+
+fizzBuzz(150);
