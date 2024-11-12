@@ -20,8 +20,12 @@ class Visitor
     subtypes.each do |subtype|
       method_name = "visit_#{subtype}_#{base_type}"
       define_method(method_name.to_sym) do |_|
-        raise NotImplementedError, "#{self.class} has not implemented ##{method_name}"
+        raise NotImplementedError, "#{self.class} has not implemented #{self.class}.#{method_name}"
       end
     end
+  end
+
+  def visit(_)
+    raise NotImplementedError, "#{self.class} has not implemented #visit"
   end
 end
