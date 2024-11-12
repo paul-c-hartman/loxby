@@ -50,11 +50,12 @@ class Lox
     end
 
     def function(kind) # rubocop:disable Metrics/MethodLength
-      name = nil
-      if check :identifier
-        # Named function
-        name = consume :identifier, "Expect #{kind} name."
-      end
+      name = if check :identifier
+               # Named function
+               consume :identifier, "Expect #{kind} name."
+             else
+               Lox::Token.new(:identifier, '(anonymous)', '(anonymous)', peek.line)
+             end
       consume :left_paren, "Expect '(' after #{kind} name."
       parameters = []
       loop do
