@@ -329,7 +329,7 @@ class Lox
     def factor
       expr = unary
 
-      while matches?(:slash, :star)
+      while matches?(:slash, :star, :percent)
         operator = previous
         right = unary
         expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)

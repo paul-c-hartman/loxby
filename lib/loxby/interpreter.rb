@@ -206,6 +206,8 @@ class Interpreter < Visitor
       end
 
       left + right
+    when :percent
+      left % right
     when :greater
       ensure_number(expr.operator, left, right)
       left.to_f > right.to_f
