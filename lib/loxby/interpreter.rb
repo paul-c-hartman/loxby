@@ -10,7 +10,7 @@ require_relative 'visitors/base'
 # Interpreter class. Walks the AST using
 # the Visitor pattern.
 class Interpreter < Visitor
-  attr_reader :globals
+  attr_reader :globals, :process
 
   def initialize(process) # rubocop:disable Lint/MissingSuper
     @process = process
@@ -18,7 +18,9 @@ class Interpreter < Visitor
     @globals = Lox::Environment.new
     # `@environment` changes based on scope.
     @environment = @globals
-
+    # `@locals` stores resolved variable references from the `Resolver`'s
+    # semantic analysis pass.
+    @locals = {}
     define_native_functions
   end
 
@@ -53,6 +55,16 @@ class Interpreter < Visitor
       obj.to_s[-2..] == '.0' ? obj.to_s[0...-2] : obj.to_s
     else
       obj.to_s
+    end
+  end
+
+  def look_up_variable(name, expr)
+    # If variable was picked up by resolver, use that,
+    # otherwise look it up in `@globals`
+    if @locals[expr]
+      @environment.get_at(@locals[expr], name.lexeme)
+    else
+      @globals[name]
     end
   end
 
@@ -98,12 +110,19 @@ class Interpreter < Visitor
   end
 
   def visit_variable_expression(expr)
-    @environment[expr.name]
+    look_up_variable(expr.name, expr)
   end
 
   def visit_assign_expression(expr)
     value = lox_eval expr.value
-    @environment.assign expr.name, value
+
+    # if @locals[expr].nil?
+    #   @environment.assign_at(distance, expr.name, value)
+    # else
+    #   @globals.assign(expr.name, value)
+    # end
+    @locals[expr] ? @environment.assign_at(@locals[expr], expr.name.lexeme, value) : @globals.assign(expr.name, value)
+
     value
   end
 
@@ -122,10 +141,15 @@ class Interpreter < Visitor
     @environment = environment
     statements.each { lox_eval _1 }
     nil
-  rescue Lox::RunError
-    nil
+  # rescue Lox::RunError => e
+  #   @process.runtime_error e
+  #   nil
   ensure
     @environment = previous
+  end
+
+  def resolve(expr, depth)
+    @locals[expr] = depth
   end
 
   # Leaves of the AST. The scanner picks
