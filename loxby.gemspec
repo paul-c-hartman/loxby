@@ -31,6 +31,6 @@ Gem::Specification.new do |s|
     } - %w[Gemfile Gemfile.lock .rubocop.yml]
   end
   s.bindir = 'bin'
-  s.executables = %w[loxby]
+  s.executables = %w[loxby loxby-debug]
   s.require_paths = %w[lib]
 end
