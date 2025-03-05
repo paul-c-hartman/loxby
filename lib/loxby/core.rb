@@ -67,6 +67,16 @@ class Lox
     @interpreter.interpret statements
   end
 
+  # Parse and feed the resulting AST into a given visitor,
+  # following the `Visitor` pattern (see visitors/base.rb).
+  def run_from_ast(source, visitor)
+    tokens = Scanner.new(source, self).scan_tokens
+    statements = Parser.new(tokens, self).parse
+    return if @errored
+
+    visitor.visit(statements)
+  end
+
   def error(line, message)
     if line.is_a? Lox::Token
       # Parse/runtime error
