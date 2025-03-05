@@ -33,5 +33,25 @@ class Lox
         @interpreter.run_prompt # Run interactively
       end
     end
+
+    def run_debug(args)
+      if args.size != 2
+        @out.puts 'Usage: loxby-debug [tool] [script]'
+        @out.puts "\tTools:"
+        @out.puts "\t - ast_printer"
+        return
+      end
+
+      require_relative 'visitors/ast_printer'
+      tool = {
+        ast_printer: ASTPrinter
+      }[args[0].to_sym]
+
+      if File.exist? args[1]
+        @interpreter.run_from_ast(File.read(args[1]), tool.new)
+      else
+        @interpreter.report(0, '', "No such file: '#{path}'")
+      end
+    end
   end
 end
