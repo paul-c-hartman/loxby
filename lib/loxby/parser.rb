@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'helpers/ast'
-require_relative 'helpers/errors'
-
 class Lox
   # `Lox::Parser` converts a list of tokens
   # from `Lox::Scanner` to a syntax tree.
   # This tree can be interacted with using
-  # the Visitor pattern. (See `Visitor`
-  # in lib/visitors/base.rb.)
+  # the Visitor pattern. (See `Lox::Visitors::BaseVisitor`
+  # in lib/visitors/base_visitor.rb.)
   class Parser
     def initialize(tokens, interpreter)
       @tokens = tokens

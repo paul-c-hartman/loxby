@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative '../loxby'
-require_relative 'config'
-
 class Lox
   # `Lox::Runner` is the interactive runner
   # which kickstarts the interpreter.
@@ -42,7 +39,6 @@ class Lox
         return
       end
 
-      require_relative 'visitors/ast_printer'
       tool = {
         ast_printer: ASTPrinter
       }[args[0].to_sym]

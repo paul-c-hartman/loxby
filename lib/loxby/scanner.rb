@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'helpers/token_type'
-require_relative 'config'
-
 class Lox
   # `Lox::Scanner` converts a string to
   # a series of tokens using a giant

@@ -26,11 +26,15 @@ Gem::Specification.new do |s|
   # Specify which files should be added to the gem when it is released.
   # `git ls-files -z` loads the files in the gem which git is tracking.
   s.files = Dir.chdir(File.expand_path(__dir__)) do
-    `git ls-files -z`.split("\x0").reject {
+    `git ls-files -z`.split("\x0").reject do
       _1.match %r{^(test|spec|features)/}
-    } - %w[Gemfile Gemfile.lock .rubocop.yml]
+    end - %w[Gemfile Gemfile.lock .rubocop.yml]
   end
   s.bindir = 'bin'
   s.executables = %w[loxby loxby-debug]
   s.require_paths = %w[lib]
+
+  s.add_dependency 'dry-configurable', '~> 1.0.0'
+  s.add_dependency 'strscan'
+  s.add_dependency 'zeitwerk'
 end
