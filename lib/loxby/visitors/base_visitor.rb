@@ -5,6 +5,11 @@ class Lox
     # Base visitor class for visitor pattern.
     # See Visitable.
     class Lox::Visitors::BaseVisitor
+      def initialize(out = $stdout, err = $stderr)
+        @out = out
+        @err = err
+      end
+
       # Defines visit methods for each subtype of a base type.
       # For example, `define_types('expression', ['binary', 'literal'])`
       # defines `#visit_binary_expression` and `#visit_literal_expression`.

@@ -6,7 +6,7 @@ class Lox
     # for easier viewing and debugging.
     class ASTPrinter < Lox::Visitors::BaseVisitor
       def print(expression)
-        puts expression.accept self
+        @out.puts expression.accept self
       end
 
       alias visit print

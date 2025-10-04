@@ -443,7 +443,7 @@ class Lox
     # We're skipping possibly erroneous tokens
     # to prevent cascading errors.
     def synchronize
-      puts 'entered panic mode'
+      # @interpreter.out.puts 'entered panic mode'
       advance
 
       until end_of_input?

@@ -11,11 +11,11 @@ class Lox
     def initialize(out = $stdout, err = $stderr)
       # Exit cleanly. 130 is for interrupted scripts
       trap('INT') do
-        puts
+        @out.puts
         exit Lox::Config.config.exit_code.interrupt
       end
 
-      @interpreter = Lox.new
+      @interpreter = Lox.new(out, err)
       @out = out
       @err = err
     end
@@ -44,7 +44,7 @@ class Lox
       }[args[0].to_sym]
 
       if File.exist? args[1]
-        @interpreter.run_from_ast(File.read(args[1]), tool.new)
+        @interpreter.run_from_ast(File.read(args[1]), tool.new(@out, @err))
       else
         @interpreter.report(0, '', "No such file: '#{path}'")
       end

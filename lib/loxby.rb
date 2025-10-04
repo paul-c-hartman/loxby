@@ -19,15 +19,17 @@ loader.setup
 # environment, including variable and
 # function scope.
 class Lox
-  attr_reader :errored, :interpreter
+  attr_reader :errored, :interpreter, :out, :err
 
-  def initialize
+  def initialize(out = $stdout, err = $stderr)
     # Whether an error occurred while parsing.
     @errored = false
     # Whether an error occurred while interpreting
     @errored_in_runtime = false
     # `Interpreter` instance. Static so interactive sessions reuse it
     @interpreter = Lox::Interpreter.new(self)
+    @out = out
+    @err = err
   end
 
   # Parse and run a file
@@ -47,12 +49,12 @@ class Lox
   def run_prompt
     catch(:lox_exit) do
       loop do
-        print '> '
+        @out.print '> '
         line = gets
         break unless line # Trap eof (Ctrl+D unix, Ctrl+Z win)
 
         result = run(line)
-        puts "=> #{@interpreter.lox_obj_to_str result}" unless @errored
+        @out.puts "=> #{@interpreter.lox_obj_to_str result}" unless @errored
 
         # When run interactively, resets after every prompt so as to not kill the repl
         @errored = false
@@ -95,19 +97,16 @@ class Lox
     end
   end
 
-  # rubocop:disable Style/StderrPuts
-
   def runtime_error(err)
-    $stderr.puts err.message
-    $stderr.puts "[line #{err.token.line}]"
+    @err.puts err.message
+    @err.puts "[line #{err.token.line}]"
     @errored_in_runtime = true
   end
 
   private
 
   def report(line, where, message)
-    $stderr.puts "[line #{line}] Error#{where}: #{message}"
+    @err.puts "[line #{line}] Error#{where}: #{message}"
     @errored = true
   end
 end
-# rubocop:enable Style/StderrPuts

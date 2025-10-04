@@ -6,7 +6,8 @@ class Lox
   class Interpreter < Visitors::BaseVisitor
     attr_reader :globals, :process
 
-    def initialize(process) # rubocop:disable Lint/MissingSuper
+    def initialize(process)
+      super(process.out, process.err)
       @process = process
       # `@globals` always refers to the same environment regardless of scope.
       @globals = Lox::Helpers::Environment.new
@@ -114,7 +115,7 @@ class Lox
 
     def visit_print_statement(statement)
       value = lox_eval statement.expression
-      puts lox_obj_to_str(value)
+      @process.out.puts lox_obj_to_str(value)
     end
 
     def visit_return_statement(statement)
@@ -282,7 +283,7 @@ end
 Lox::Interpreter.native_function :clock, arity: 0, &->(_int, _args) { Time.now.to_f }
 Lox::Interpreter.native_function :exit, arity: 0, &->(_int, _args) { throw :lox_exit }
 Lox::Interpreter.native_function(:_inspectLocalScope, arity: 0) do |interpreter, _args|
-  puts <<~OUT
+  @process.out.puts <<~OUT
     ~~~~
     LOCAL SCOPE INSPECTOR
     ====
