@@ -8,8 +8,9 @@ Loxby is written following the first half of Robert Nystrom's wonderful web-form
 2. `loxby [filename]` to run a file or `loxby` to run in REPL mode
 3. To run the interpreter from Ruby:
     ```ruby
-    require 'loxby/runner'
-    Lox::Runner.new(ARGV, $stdout, $stderr)
+    require 'loxby'
+    runner = Lox::Runner.new($stdout, $stderr)
+    runner.run(ARGV)
     ```
 
 ## License
