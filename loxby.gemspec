@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   'can look like and accomplish.'
   s.homepage = 'https://github.com/paul-c-hartman/loxby'
   s.license = 'MIT'
-  s.required_ruby_version = Gem::Requirement.new(">= #{File.read('.ruby-version').chomp}") # Shorthand hash syntax
+  s.required_ruby_version = Gem::Requirement.new('>= 3.2.0')
 
   s.metadata['homepage_uri'] = s.homepage
   s.metadata['source_code_uri'] = s.homepage
