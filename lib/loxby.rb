@@ -7,7 +7,7 @@ require 'zeitwerk'
 loader = Zeitwerk::Loader.for_gem(warn_on_extra_files: false)
 loader.ignore("#{__dir__}/../test")
 loader.inflector.inflect(
-  'ast_printer' => 'ASTPrinter',
+  'ast' => 'AST',
   'rpn_converter' => 'RPNConverter',
   'version' => 'VERSION',
   'loxby' => 'Lox'
@@ -39,8 +39,8 @@ class Lox
     else
       report(0, '', "No such file: '#{path}'")
     end
-    exit Lox.config.exit_code.syntax_error if @errored # Don't execute malformed code
-    exit Lox.config.exit_code.runtime_error if @errored_in_runtime
+    exit Lox::Config.config.exit_code.syntax_error if @errored # Don't execute malformed code
+    exit Lox::Config.config.exit_code.runtime_error if @errored_in_runtime
   end
 
   # Run interactively, REPL-style
@@ -67,7 +67,7 @@ class Lox
     statements = parser.parse
     return if @errored
 
-    resolver = ::Resolver.new(@interpreter)
+    resolver = Resolver.new(@interpreter)
     # No need to store output as this injects data
     # directly into the interpreter
     resolver.resolve statements
@@ -85,7 +85,7 @@ class Lox
   end
 
   def error(line, message)
-    if line.is_a? Lox::Token
+    if line.is_a? Lox::Helpers::Token
       # Parse/runtime error
       where = line.type == :eof ? 'end' : "'#{line.lexeme}'"
       report(line.line, " at #{where}", message)

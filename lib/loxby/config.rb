@@ -42,7 +42,7 @@ class Lox
 
       setting :single_tokens,
               default: '(){},.-+;/*?:%',
-              constructor: -> { _1.split('').zip(Lox.config.token_types.tokens).to_h }
+              constructor: -> { _1.split('').zip(Lox::Config.config.token_types.tokens).to_h }
     end
 
     setting :native_functions, default: [], reader: true

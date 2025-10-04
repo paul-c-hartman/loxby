@@ -12,7 +12,7 @@ class Lox
       # Exit cleanly. 130 is for interrupted scripts
       trap('INT') do
         puts
-        exit Lox.config.exit_code.interrupt
+        exit Lox::Config.config.exit_code.interrupt
       end
 
       @interpreter = Lox.new
@@ -23,7 +23,7 @@ class Lox
     def run(args)
       if args.size > 1
         @out.puts 'Usage: loxby [script]'
-        exit Lox.config.exit_code.usage
+        exit Lox::Config.config.exit_code.usage
       elsif args.size == 1
         @interpreter.run_file args[0]
       else
@@ -40,7 +40,7 @@ class Lox
       end
 
       tool = {
-        ast_printer: ASTPrinter
+        ast_printer: Lox::Visitors::ASTPrinter
       }[args[0].to_sym]
 
       if File.exist? args[1]

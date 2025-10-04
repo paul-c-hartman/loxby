@@ -6,7 +6,7 @@ class Lox
     # in loxby. Currently just functions.
     #
     # To mark a class as callable, simply
-    # `include Lox::Callable`.
+    # `include Lox::Helpers::Callable`.
     module Callable
       def call(_interpreter, _arguments)
         raise NotImplementedError, "#{self.class} has not implemented #call"

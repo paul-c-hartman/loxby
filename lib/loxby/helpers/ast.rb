@@ -16,7 +16,7 @@ class Lox
   module Helpers
     # Interface:
     # ```ruby
-    #   Lox::AST.define_ast(
+    #   Lox::Helpers::AST.define_ast(
     #     "ASTBaseClass",
     #     {
     #       :ast_type => [
@@ -28,7 +28,7 @@ class Lox
     #   )
     # ```
     #
-    # This call to `#define_ast` generates `Lox::AST::ASTBaseClass`, as well as `::AstType` and
+    # This call to `#define_ast` generates `Lox::Helpers::AST::ASTBaseClass`, as well as `::AstType` and
     # `::OtherAstType` descending from and scoped under it. Generated classes follow the Visitor
     # pattern: `::AstType` generates with `#accept(visitor)` which calls `visitor.visit_ast_type(self)`.
     module AST
@@ -38,7 +38,7 @@ class Lox
         base_class = Class.new
         base_class.include Visitable
         # Define boilerplate visitor methods
-        Visitor.define_types(base_name, types.keys)
+        Lox::Visitors::BaseVisitor.define_types(base_name, types.keys)
         # Dynamically create subclasses for each AST type
         types.each do |class_name, fields|
           define_type(base_class, base_name, class_name, fields)
@@ -68,7 +68,7 @@ class Lox
         define_class(subtype_name.to_camel_case, subtype, base_class:)
       end
 
-      def define_class(class_name, klass, base_class: Lox::AST)
+      def define_class(class_name, klass, base_class: Lox::Helpers::AST)
         base_class.const_set class_name, klass
       end
     end
@@ -76,6 +76,6 @@ class Lox
 end
 
 # Default AST specification for loxby.
-Lox.config.ast.values.each do |name, definition|
-  Lox::AST.define_ast(name, definition)
+Lox::Config.config.ast.values.each do |name, definition|
+  Lox::Helpers::AST.define_ast(name, definition)
 end

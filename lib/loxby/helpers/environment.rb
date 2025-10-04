@@ -13,7 +13,7 @@ class Lox
       end
 
       def undefined_variable(name)
-        Lox::RunError.new(name, "Undefined variable '#{name.lexeme}'")
+        Lox::Helpers::Errors::RunError.new(name, "Undefined variable '#{name.lexeme}'")
       end
 
       def []=(name, value)
@@ -44,7 +44,7 @@ class Lox
         if @values[name.lexeme]
           @values[name.lexeme]
         elsif declared? name
-          raise Lox::RunError.new(name, "Declared variable not initialized: '#{name.lexeme}'")
+          raise Lox::Helpers::Errors::RunError.new(name, "Declared variable not initialized: '#{name.lexeme}'")
         elsif @enclosing
           @enclosing[name]
         else

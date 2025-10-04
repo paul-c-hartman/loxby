@@ -31,9 +31,9 @@ class Lox
         # someone put a function definition in an expression statement.
         # Which is valid (though look at this gross surgery to get it
         # to work) while extra semicolons are not.
-        if @statements[-1].is_a? Lox::AST::Statement::Function
+        if @statements[-1].is_a? Lox::Helpers::AST::Statement::Function
           advance
-          Lox::AST::Statement::Expression.new(expression: @statements.pop)
+          Lox::Helpers::AST::Statement::Expression.new(expression: @statements.pop)
         end
 
         # If it's not a function-in-expression-statement, control flow
@@ -41,7 +41,7 @@ class Lox
       else
         statement
       end
-    rescue Lox::ParseError
+    rescue Lox::Helpers::Errors::ParseError
       synchronize
       nil
     end
@@ -51,7 +51,7 @@ class Lox
                # Named function
                consume :identifier, "Expect #{kind} name."
              else
-               Lox::Token.new(:identifier, '(anonymous)', '(anonymous)', peek.line)
+               Lox::Helpers::Token.new(:identifier, '(anonymous)', '(anonymous)', peek.line)
              end
       consume :left_paren, "Expect '(' after #{kind} name."
       parameters = []
@@ -71,14 +71,14 @@ class Lox
       consume :left_brace, 'Expect block after parameter list.'
       body = block
 
-      Lox::AST::Statement::Function.new(name:, params: parameters, body:)
+      Lox::Helpers::AST::Statement::Function.new(name:, params: parameters, body:)
     end
 
     def var_declaration
       name = consume :identifier, 'Expect variable name.'
       initializer = matches?(:equal) ? expression : nil
       consume :semicolon, "Expect ';' after variable declaration."
-      Lox::AST::Statement::Var.new(name:, initializer:)
+      Lox::Helpers::AST::Statement::Var.new(name:, initializer:)
     end
 
     def statement # rubocop:disable Metrics/MethodLength,Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
@@ -95,7 +95,7 @@ class Lox
       elsif matches? :fun
         function 'function'
       elsif matches? :left_brace
-        Lox::AST::Statement::Block.new(statements: block)
+        Lox::Helpers::AST::Statement::Block.new(statements: block)
       else
         expression_statement
       end
@@ -119,7 +119,7 @@ class Lox
     def print_statement
       value = expression_list
       consume :semicolon, "Expect ';' after value."
-      Lox::AST::Statement::Print.new(expression: value)
+      Lox::Helpers::AST::Statement::Print.new(expression: value)
     end
 
     def return_statement
@@ -128,7 +128,7 @@ class Lox
       value = expression unless check :semicolon
 
       consume :semicolon, "Expect ';' after return value."
-      Lox::AST::Statement::Return.new(keyword:, value:)
+      Lox::Helpers::AST::Statement::Return.new(keyword:, value:)
     end
 
     def if_statement
@@ -142,7 +142,7 @@ class Lox
       then_branch = statement
       else_branch = matches?(:else) ? statement : nil
 
-      Lox::AST::Statement::If.new(condition:, then_branch:, else_branch:)
+      Lox::Helpers::AST::Statement::If.new(condition:, then_branch:, else_branch:)
     end
 
     def while_statement
@@ -151,7 +151,7 @@ class Lox
       consume :right_paren, "Expect ')' after condition."
       body = statement
 
-      Lox::AST::Statement::While.new(condition:, body:)
+      Lox::Helpers::AST::Statement::While.new(condition:, body:)
     end
 
     # `for` loops in loxby are syntactic sugar
@@ -180,19 +180,19 @@ class Lox
       body = statement
 
       unless increment.nil?
-        body = Lox::AST::Statement::Block.new(
+        body = Lox::Helpers::AST::Statement::Block.new(
           statements: [
             body,
-            Lox::AST::Statement::Expression.new(expression: increment)
+            Lox::Helpers::AST::Statement::Expression.new(expression: increment)
           ]
         )
       end
 
-      condition = Lox::AST::Expression::Literal.new(value: true) if condition.nil?
-      body = Lox::AST::Statement::While.new(condition:, body:)
+      condition = Lox::Helpers::AST::Expression::Literal.new(value: true) if condition.nil?
+      body = Lox::Helpers::AST::Statement::While.new(condition:, body:)
 
       unless initializer.nil?
-        body = Lox::AST::Statement::Block.new(
+        body = Lox::Helpers::AST::Statement::Block.new(
           statements: [
             initializer,
             body
@@ -205,13 +205,13 @@ class Lox
 
     def break_statement
       consume :semicolon, "Expect ';' after break."
-      Lox::AST::Statement::Break.new
+      Lox::Helpers::AST::Statement::Break.new
     end
 
     def expression_statement
       expr = expression_list
       consume :semicolon, "Expect ';' after expression."
-      Lox::AST::Statement::Expression.new(expression: expr)
+      Lox::Helpers::AST::Statement::Expression.new(expression: expr)
     end
 
     def expression_list
@@ -220,7 +220,7 @@ class Lox
       while matches? :comma
         operator = previous
         right = conditional
-        expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)
+        expr = Lox::Helpers::AST::Expression::Binary.new(left: expr, operator:, right:)
       end
 
       expr
@@ -232,11 +232,11 @@ class Lox
 
       if matches? :question
         left_operator = previous
-        center = check(:colon) ? Lox::AST::Expression::Literal.new(value: nil) : expression_list
+        center = check(:colon) ? Lox::Helpers::AST::Expression::Literal.new(value: nil) : expression_list
         consume :colon, "Expect ':' after expression: incomplete ternary operator."
         right_operator = previous
         right = conditional # Recurse, right-associative
-        expr = Lox::AST::Expression::Ternary.new(left: expr, left_operator:, center:, right_operator:, right:)
+        expr = Lox::Helpers::AST::Expression::Ternary.new(left: expr, left_operator:, center:, right_operator:, right:)
       end
 
       expr
@@ -253,9 +253,9 @@ class Lox
         equals = previous
         value = assignment
 
-        if expr.is_a? Lox::AST::Expression::Variable
+        if expr.is_a? Lox::Helpers::AST::Expression::Variable
           name = expr.name
-          return Lox::AST::Expression::Assign.new(name:, value:)
+          return Lox::Helpers::AST::Expression::Assign.new(name:, value:)
         end
 
         error equals, 'Invalid assignment target.'
@@ -270,7 +270,7 @@ class Lox
       while matches? :or
         operator = previous
         right = logical_and
-        expr = Lox::AST::Expression::Logical.new(left: expr, operator:, right:)
+        expr = Lox::Helpers::AST::Expression::Logical.new(left: expr, operator:, right:)
       end
 
       expr
@@ -282,7 +282,7 @@ class Lox
       while matches? :and
         operator = previous
         right = logical_and
-        expr = Lox::AST::Expression::Logical.new(left: expr, operator:, right:)
+        expr = Lox::Helpers::AST::Expression::Logical.new(left: expr, operator:, right:)
       end
 
       expr
@@ -294,7 +294,7 @@ class Lox
         operator = previous
         right = comparison
         # Compose (equality is left-associative)
-        expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)
+        expr = Lox::Helpers::AST::Expression::Binary.new(left: expr, operator:, right:)
       end
       expr
     end
@@ -305,7 +305,7 @@ class Lox
       while matches?(:greater, :greater_equal, :less, :less_equal)
         operator = previous
         right = term
-        expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)
+        expr = Lox::Helpers::AST::Expression::Binary.new(left: expr, operator:, right:)
       end
 
       expr
@@ -317,7 +317,7 @@ class Lox
       while matches?(:minus, :plus)
         operator = previous
         right = factor
-        expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)
+        expr = Lox::Helpers::AST::Expression::Binary.new(left: expr, operator:, right:)
       end
 
       expr
@@ -329,7 +329,7 @@ class Lox
       while matches?(:slash, :star, :percent)
         operator = previous
         right = unary
-        expr = Lox::AST::Expression::Binary.new(left: expr, operator:, right:)
+        expr = Lox::Helpers::AST::Expression::Binary.new(left: expr, operator:, right:)
       end
 
       expr
@@ -342,7 +342,7 @@ class Lox
         operator = previous
         right = unary
 
-        Lox::AST::Expression::Unary.new(operator:, right:)
+        Lox::Helpers::AST::Expression::Unary.new(operator:, right:)
       else
         function_call
       end
@@ -368,28 +368,28 @@ class Lox
         end
       end
       paren = consume :right_paren, "Expect ')' after arguments."
-      Lox::AST::Expression::Call.new(callee:, paren:, arguments:)
+      Lox::Helpers::AST::Expression::Call.new(callee:, paren:, arguments:)
     end
 
     def primary # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       if matches? :false
-        Lox::AST::Expression::Literal.new(value: false)
+        Lox::Helpers::AST::Expression::Literal.new(value: false)
       elsif matches? :true
-        Lox::AST::Expression::Literal.new(value: true)
+        Lox::Helpers::AST::Expression::Literal.new(value: true)
       elsif matches? :nil
-        Lox::AST::Expression::Literal.new(value: nil)
+        Lox::Helpers::AST::Expression::Literal.new(value: nil)
       elsif matches? :fun
         function 'inline function'
       elsif matches? :number, :string
-        Lox::AST::Expression::Literal.new(value: previous.literal)
+        Lox::Helpers::AST::Expression::Literal.new(value: previous.literal)
       elsif matches? :break
         raise error(previous, "Invalid 'break' not in loop.")
       elsif matches? :identifier
-        Lox::AST::Expression::Variable.new(name: previous)
+        Lox::Helpers::AST::Expression::Variable.new(name: previous)
       elsif matches? :left_paren
         expr = expression_list
         consume :right_paren, "Expect ')' after expression."
-        Lox::AST::Expression::Grouping.new(expression: expr)
+        Lox::Helpers::AST::Expression::Grouping.new(expression: expr)
       # Error productions--binary operator without left operand
       elsif matches? :comma
         err = error(previous, "Expect expression before ',' operator.")
@@ -436,7 +436,7 @@ class Lox
 
     def error(token, message)
       @interpreter.error(token, message)
-      Lox::ParseError.new
+      Lox::Helpers::Errors::ParseError.new
     end
 
     # Synchronize the parser (i.e. panic mode).

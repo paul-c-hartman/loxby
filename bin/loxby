@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
-require 'loxby/runner'
+require 'loxby'
 
 # Start interpreter
 Lox::Runner.new.run(ARGV)

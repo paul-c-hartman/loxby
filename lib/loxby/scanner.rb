@@ -6,12 +6,12 @@ class Lox
   # `case` statement.
   class Scanner
     # Custom character classes for certain tokens.
-    EXPRESSIONS = Lox.config.scanner.expressions.to_h
+    EXPRESSIONS = Lox::Config.config.scanner.expressions.to_h
 
     # Map of keywords to token types.
     # Right now, all keywords have
     # their own token type.
-    KEYWORDS = Lox.config.scanner.keywords.map { [_1, _1.to_sym] }.to_h
+    KEYWORDS = Lox::Config.config.scanner.keywords.map { [_1, _1.to_sym] }.to_h
 
     attr_accessor :line
 
@@ -35,7 +35,7 @@ class Lox
       end
 
       # Implicitly return @tokens
-      @tokens << Lox::Token.new(:eof, '', nil, @line)
+      @tokens << Lox::Helpers::Token.new(:eof, '', nil, @line)
     end
 
     # Consume enough characters for the next token.
@@ -55,8 +55,8 @@ class Lox
           add_token :slash
         end
       # Single-character tokens
-      when Regexp.union(Lox::Token::SINGLE_TOKENS.keys)
-        add_token Lox::Token::SINGLE_TOKENS[character]
+      when Regexp.union(Lox::Helpers::Token::SINGLE_TOKENS.keys)
+        add_token Lox::Helpers::Token::SINGLE_TOKENS[character]
       # 1-2 character tokens
       when '!'
         add_token match('=') ? :bang_equal : :bang
@@ -151,7 +151,7 @@ class Lox
     # Emit a token.
     def add_token(type, literal = nil)
       text = @source[@start...@current]
-      @tokens << Lox::Token.new(type, text, literal, @line)
+      @tokens << Lox::Helpers::Token.new(type, text, literal, @line)
     end
 
     # Move the pointer ahead if character matches expected character; error otherwise.

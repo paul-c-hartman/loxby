@@ -7,10 +7,10 @@ class Lox
     # by `Lox::Parser`.
     class Token
       # List of all token types.
-      TOKENS = Lox.config.token_types.tokens
+      TOKENS = Lox::Config.config.token_types.tokens
 
       # Map of single-character token types.
-      SINGLE_TOKENS = Lox.config.token_types.single_tokens
+      SINGLE_TOKENS = Lox::Config.config.token_types.single_tokens
 
       attr_reader :type, :lexeme, :literal, :line
 
@@ -22,7 +22,7 @@ class Lox
       end
 
       def to_s = "#{type} #{lexeme} #{literal}"
-      def inspect = "#<Lox::Token #{self}>"
+      def inspect = "#<Lox::Helpers::Token #{self}>"
     end
   end
 end

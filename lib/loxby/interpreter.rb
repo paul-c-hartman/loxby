@@ -22,7 +22,7 @@ class Lox
       result = nil
       statements.each { result = lox_eval(_1) }
       result
-    rescue Lox::RunError => e
+    rescue Lox::Helpers::Errors::RunError => e
       @process.runtime_error e
       nil
     end
@@ -68,7 +68,9 @@ class Lox
     end
 
     def ensure_number(operator, *objs)
-      raise Lox::RunError.new(operator, 'Operand must be a number.') unless objs.all? { _1.is_a?(Float) }
+      return if objs.all? { _1.is_a?(Float) }
+
+      raise Lox::Helpers::Errors::RunError.new(operator, 'Operand must be a number.')
     end
 
     def lox_obj_to_str(obj)
@@ -97,7 +99,7 @@ class Lox
     end
 
     def visit_function_statement(statement)
-      function = Lox::Function.new(statement, @environment)
+      function = Lox::Helpers::Function.new(statement, @environment)
       @environment[statement.name] = function if statement.name
       function
     end
@@ -153,7 +155,7 @@ class Lox
     def visit_block_statement(statement)
       # Pull out a copy of the environment
       # so that blocks are closures
-      execute_block(statement.statements, Lox::Environment.new(@environment))
+      execute_block(statement.statements, Lox::Helpers::Environment.new(@environment))
     end
 
     def visit_break_statement(_)
@@ -165,7 +167,7 @@ class Lox
       @environment = environment
       statements.each { lox_eval _1 }
       nil
-    # rescue Lox::RunError => e
+    # rescue Lox::Helpers::Errors::RunError => e
     #   @process.runtime_error e
     #   nil
     ensure
@@ -217,7 +219,7 @@ class Lox
         ensure_number(expr.operator, left, right)
         left.to_f - right.to_f
       when :slash
-        raise Lox::DividedByZeroError.new(expr.operator, 'Cannot divide by zero.') if right == 0.0
+        raise Lox::Helpers::Errors::DividedByZeroError.new(expr.operator, 'Cannot divide by zero.') if right == 0.0
 
         ensure_number(expr.operator, left, right)
         left.to_f / right
@@ -226,7 +228,7 @@ class Lox
         left.to_f * right.to_f
       when :plus
         unless (left.is_a?(Float) || left.is_a?(String)) && left.instance_of?(right.class)
-          raise Lox::RunError.new(expr.operator, 'Operands must be two numbers or two strings.')
+          raise Lox::Helpers::Errors::RunError.new(expr.operator, 'Operands must be two numbers or two strings.')
         end
 
         left + right
@@ -263,12 +265,13 @@ class Lox
       callee = lox_eval expr.callee
       arguments = expr.arguments.map { lox_eval _1 }
 
-      unless callee.class.include? Lox::Callable
-        raise Lox::RunError.new(expr.paren, 'Can only call functions and classes.')
+      unless callee.class.include? Lox::Helpers::Callable
+        raise Lox::Helpers::Errors::RunError.new(expr.paren, 'Can only call functions and classes.')
       end
 
       unless arguments.size == callee.arity
-        raise Lox::RunError.new(expr.paren, "Expected #{callee.arity} arguments but got #{arguments.size}.")
+        raise Lox::Helpers::Errors::RunError.new(expr.paren,
+                                                 "Expected #{callee.arity} arguments but got #{arguments.size}.")
       end
 
       callee.call(self, arguments)
