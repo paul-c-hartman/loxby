@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        ruby-version: ['3.4.4', '3.3', '3.2']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true # runs 'bundle install' and caches gems
+    
+    - name: Run tests
+      run: bundle exec rake test
+    
+    - name: Run RuboCop
+      run: bundle exec rubocop
+      if: matrix.ruby-version == '3.4.4' # Only run linting on one Ruby version
