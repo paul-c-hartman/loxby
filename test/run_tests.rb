@@ -2,17 +2,18 @@
 
 require 'minitest/autorun'
 require 'English'
-require 'open3'
+require 'stringio'
+require 'loxby'
 
 puts 'Running tests:'
 
 def run_lox_file(file)
-  values = []
-  Open3.popen2e("bundle exec loxby \"#{file}\"") do |_stdin, stdout_and_stderr, wait_thr|
-    values << stdout_and_stderr.read
-    values << wait_thr.value
-  end
-  values
+  out = StringIO.new
+  lox = Lox.new(out, out)
+  lox.run_file file
+  [out.string, 0]
+rescue SystemExit => e
+  [out.string, e.status]
 end
 
 class LoxTest < Minitest::Test
