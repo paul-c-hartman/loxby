@@ -105,7 +105,7 @@ end
 # Monkeypatching Array is the wrong approach. Maybe consider creating a custom subclass?
 # TokenList/StatementList/something like that?
 
-class Array
+class Array # rubocop:disable Style/Documentation
   def accept(visitor)
     visitor.visit_list(self)
   end

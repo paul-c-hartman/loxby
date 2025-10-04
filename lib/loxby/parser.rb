@@ -20,7 +20,7 @@ class Lox
       @statements
     end
 
-    def declaration
+    def declaration # rubocop:disable Metrics/MethodLength
       if matches? :fun
         function 'function'
         # primary
@@ -46,7 +46,7 @@ class Lox
       nil
     end
 
-    def function(kind) # rubocop:disable Metrics/MethodLength
+    def function(kind) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
       name = if check :identifier
                # Named function
                consume :identifier, "Expect #{kind} name."

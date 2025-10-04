@@ -33,15 +33,11 @@ class Lox
 
     def run_debug(args)
       if args.size != 2
-        @out.puts 'Usage: loxby-debug [tool] [script]'
-        @out.puts "\tTools:"
-        @out.puts "\t - ast_printer"
+        @out.puts "Usage: loxby-debug [tool] [script]\n\tTools:\n\t - ast_printer"
         return
       end
 
-      tool = {
-        ast_printer: Lox::Visitors::ASTPrinter
-      }[args[0].to_sym]
+      tool = { ast_printer: Lox::Visitors::ASTPrinter }[args[0].to_sym]
 
       if File.exist? args[1]
         @interpreter.run_from_ast(File.read(args[1]), tool.new(@out, @err))

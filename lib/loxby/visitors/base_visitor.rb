@@ -4,7 +4,7 @@ class Lox
   module Visitors
     # Base visitor class for visitor pattern.
     # See Visitable.
-    class Lox::Visitors::BaseVisitor
+    class BaseVisitor
       def initialize(out = $stdout, err = $stderr)
         @out = out
         @err = err

@@ -3,6 +3,8 @@
 require 'dry-configurable'
 
 class Lox
+  # Configuration for Loxby.
+  # Uses dry-configurable gem.
   module Config
     extend Dry::Configurable
 
