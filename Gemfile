@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby file: '.ruby-version'
+ruby '>= 3'
 
 gem 'debug', group: :development, require: false
 gem 'dry-configurable', '~> 1.0.0'
