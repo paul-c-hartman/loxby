@@ -3,13 +3,8 @@
 class Lox
   module Helpers
     module Errors
-      # A generic loxby error class raised
-      # when a syntax error is found.
-      class ParseError < RuntimeError; end
-
-      # A generic loxby error class raised
-      # when a runtime error is found.
-      class RunError < RuntimeError
+      # The base class for all loxby errors.
+      class BaseError < StandardError
         attr_reader :token
 
         def initialize(token, message)
@@ -17,6 +12,14 @@ class Lox
           @token = token
         end
       end
+
+      # A generic loxby error class raised
+      # when a syntax error is found.
+      class ParseError < BaseError; end
+
+      # A generic loxby error class raised
+      # when a runtime error is found.
+      class RunError < BaseError; end
 
       # A loxby error class raised when
       # a number is divided by zero.
