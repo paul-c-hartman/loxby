@@ -70,9 +70,12 @@ class Lox
     return if @errored
 
     resolver = Resolver.new(@interpreter)
+
     # No need to store output as this injects data
     # directly into the interpreter
     resolver.resolve statements
+    return if @errored # To prevent running code when the resolver found an error
+
     @interpreter.interpret statements
   end
 
