@@ -27,22 +27,9 @@ class Lox
       elsif args.size == 1
         @interpreter.run_file args[0]
       else
-        @interpreter.run_prompt # Run interactively
-      end
-    end
-
-    def run_debug(args)
-      if args.size != 2
-        @out.puts "Usage: loxby-debug [tool] [script]\n\tTools:\n\t - ast_printer"
-        return
-      end
-
-      tool = { ast_printer: Lox::Visitors::ASTPrinter }[args[0].to_sym]
-
-      if File.exist? args[1]
-        @interpreter.run_from_ast(File.read(args[1]), tool.new(@out, @err))
-      else
-        @interpreter.report(0, '', "No such file: '#{path}'")
+        # @interpreter.run_prompt # Run interactively
+        @err.puts 'Interactive mode not yet implemented.'
+        exit Lox::Config.config.exit_code.usage
       end
     end
   end

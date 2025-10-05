@@ -1,7 +1,0 @@
-// No initializers.
-var a;
-var b;
-
-a = "assigned";
-print a; // Was assigned first, OK.
-//print b; // Not assigned first, error.

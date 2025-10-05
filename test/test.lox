@@ -1,9 +1,0 @@
-print "one";
-print true;
-print 2 + 1;
-
-var a = 1;
-{
-  var b = a + 2;
-  print b;
-}
