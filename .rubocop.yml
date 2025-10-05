@@ -9,3 +9,6 @@ Lint/BooleanSymbol:
 
 Style/HashEachMethods:
   Enabled: false
+
+Layout/EndOfLine:
+  Enabled: false
