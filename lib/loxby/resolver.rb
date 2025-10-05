@@ -5,11 +5,13 @@ class Lox
   # analysis to resolve variable
   # references in a single pass.
   class Resolver < Lox::Visitors::BaseVisitor
-    attr_reader :scopes
+    attr_reader :scopes, :current_function, :current_class
 
     def initialize(interpreter) # rubocop:disable Lint/MissingSuper
       @interpreter = interpreter
       @scopes = []
+      @current_function = nil
+      @current_class = nil
     end
 
     def resolve(*statements_or_expressions)
@@ -27,7 +29,10 @@ class Lox
       end
     end
 
-    def resolve_function(func)
+    def resolve_function(func, type:)
+      enclosing_function = @current_function
+      @current_function = type
+
       begin_scope
       func.params.each do |param|
         declare param
@@ -35,6 +40,7 @@ class Lox
       end
       resolve func.body
       end_scope
+      @current_function = enclosing_function
     end
 
     def begin_scope
@@ -65,6 +71,24 @@ class Lox
       end_scope
     end
 
+    def visit_class_statement(statement) # rubocop:disable Metrics/MethodLength
+      enclosing_class = @current_class
+      @current_class = :class
+
+      declare statement.name
+      define statement.name
+
+      begin_scope
+      @scopes.last['this'] = true
+
+      statement.methods.each do |method|
+        function_type = :method
+        resolve_function method, type: function_type
+      end
+      end_scope
+      @current_class = enclosing_class
+    end
+
     def visit_var_statement(statement)
       declare statement.name
       resolve statement.initializer if statement.initializer
@@ -75,7 +99,7 @@ class Lox
       declare statement.name
       define statement.name
 
-      resolve_function statement
+      resolve_function statement, type: :function
     end
 
     def visit_expression_statement(statement)
@@ -93,6 +117,7 @@ class Lox
     end
 
     def visit_return_statement(statement)
+      @interpreter.process.error(statement.keyword, "Can't return from top-level code.") unless @current_function
       resolve statement.value if statement.value
     end
 
@@ -119,6 +144,10 @@ class Lox
       expr.arguments.each { resolve _1 }
     end
 
+    def visit_get_expression(expr)
+      resolve expr.object
+    end
+
     def visit_grouping_expression(expr)
       resolve expr.expression
     end
@@ -128,6 +157,20 @@ class Lox
     def visit_logical_expression(expr)
       resolve expr.left
       resolve expr.right
+    end
+
+    def visit_set_expression(expr)
+      resolve expr.value
+      resolve expr.object
+    end
+
+    def visit_this_expression(expr)
+      unless @current_class
+        @interpreter.process.error(expr.keyword, "Can't use 'this' outside of a class.")
+        return
+      end
+
+      resolve_local(expr, expr.keyword)
     end
 
     def visit_unary_expression(expr)

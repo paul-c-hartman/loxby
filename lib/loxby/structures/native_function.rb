@@ -4,7 +4,7 @@ class Lox
   # The `Helpers` module contains
   # various helper modules and classes
   # used throughout loxby.
-  module Helpers
+  module Structures
     # A `NativeFunction` is a loxby function
     # which references a callable Ruby
     # object (block, proc, method, etc.).

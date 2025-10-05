@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 class Lox
-  module Helpers
+  module Structures
     # A `Function` is a loxby function.
     #
     # You could manually instantiate one,
     # but why would you?
     class Function
-      include Callable
+      include Lox::Helpers::Callable
       attr_reader :declaration, :enclosure
 
       def initialize(declaration, closure)
@@ -16,7 +16,7 @@ class Lox
       end
 
       def call(interpreter, args)
-        env = Environment.new(@closure)
+        env = Lox::Helpers::Environment.new(@closure)
         @declaration.params.zip(args).each do |param, arg|
           env[param] = arg # Environment grabs the lexeme automatically
         end
@@ -29,6 +29,12 @@ class Lox
           # If we get here, there was no return statement.
           return nil
         end
+      end
+
+      def bind(instance)
+        env = Lox::Helpers::Environment.new(@closure)
+        env.set('this', instance)
+        Function.new(@declaration, env)
       end
 
       def arity = @declaration.params.size

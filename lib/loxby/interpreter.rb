@@ -54,7 +54,7 @@ class Lox
 
     def define_native_functions
       Lox::Config.native_functions.each do |func|
-        @globals.set func[:name].to_s, Lox::Helpers::NativeFunction.new(func[:arity], &func[:block])
+        @globals.set func[:name].to_s, Lox::Structures::NativeFunction.new(func[:arity], &func[:block])
       end
     end
 
@@ -100,7 +100,7 @@ class Lox
     end
 
     def visit_function_statement(statement)
-      function = Lox::Helpers::Function.new(statement, @environment)
+      function = Lox::Structures::Function.new(statement, @environment)
       @environment[statement.name] = function if statement.name
       function
     end
@@ -159,6 +159,14 @@ class Lox
       execute_block(statement.statements, Lox::Helpers::Environment.new(@environment))
     end
 
+    def visit_class_statement(statement)
+      methods = statement.methods.map do |method|
+        [method.name.lexeme, Lox::Structures::Function.new(method, @environment)]
+      end.to_h
+      klass = Lox::Structures::Class.new(statement.name.lexeme, methods)
+      @environment[statement.name] = klass
+    end
+
     def visit_break_statement(_)
       throw :break
     end
@@ -194,6 +202,20 @@ class Lox
       else # Just and, for now
         truthy?(left) ? lox_eval(expr.right) : left
       end
+    end
+
+    def visit_set_expression(expr)
+      object = lox_eval expr.object
+      unless object.is_a? Lox::Structures::Instance
+        raise Lox::Helpers::Errors::RunError.new(expr.name, 'Only instances have fields.')
+      end
+
+      value = lox_eval expr.value
+      object.set(expr.name, value)
+    end
+
+    def visit_this_expression(expr)
+      look_up_variable(expr.keyword, expr)
     end
 
     def visit_grouping_expression(expr)
@@ -276,6 +298,15 @@ class Lox
       end
 
       callee.call(self, arguments)
+    end
+
+    def visit_get_expression(expr)
+      object = lox_eval expr.object
+      unless object.is_a? Lox::Structures::Instance
+        raise Lox::Helpers::Errors::RunError.new(expr.name, 'Only instances have properties.')
+      end
+
+      object.get(expr.name)
     end
   end
 end

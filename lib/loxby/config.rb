@@ -49,7 +49,7 @@ class Lox
 
     setting :native_functions, default: [], reader: true
 
-    setting :ast do
+    setting :ast do # rubocop:disable Metrics/BlockLength
       setting :expression,
               default: {
                 assign: [%i[token name], %i[expr value]],
@@ -57,15 +57,19 @@ class Lox
                 ternary: [%i[expr left], %i[token left_operator], %i[expr center], %i[token right_operator],
                           %i[expr right]],
                 call: [%i[expr callee], %i[token paren], %i[expr_list arguments]],
+                get: [%i[expr object], %i[token name]],
                 grouping: [%i[expr expression]],
                 literal: [%i[object value]],
                 logical: [%i[expr left], %i[token operator], %i[expr right]],
+                set: [%i[expr object], %i[token name], %i[expr value]],
+                this: [%i[token keyword]],
                 unary: [%i[token operator], %i[expr right]],
                 variable: [%i[token name]]
               }
       setting :statement,
               default: {
                 block: [%i[stmt_list statements]],
+                class: [%i[token name], %i[func_list methods]],
                 expression: [%i[expr expression]],
                 function: [%i[token name], %i[token_list params], %i[stmt_list body]],
                 if: [%i[expr condition], %i[stmt then_branch], %i[stmt else_branch]],

@@ -21,7 +21,9 @@ class Lox
     end
 
     def declaration # rubocop:disable Metrics/MethodLength
-      if matches? :fun
+      if matches? :class
+        class_declaration
+      elsif matches? :fun
         function 'function'
         # primary
       elsif matches? :var
@@ -44,6 +46,20 @@ class Lox
     rescue Lox::Helpers::Errors::ParseError
       synchronize
       nil
+    end
+
+    def class_declaration
+      name = consume :identifier, 'Expect class name.'
+      consume :left_brace, "Expect '{' before class body."
+      methods = []
+      loop do
+        break if check :right_brace
+
+        methods << function('method')
+      end
+      consume :right_brace, "Expect '}' after class body."
+
+      Lox::Helpers::AST::Statement::Class.new(name:, methods:)
     end
 
     def function(kind) # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
@@ -256,6 +272,8 @@ class Lox
         if expr.is_a? Lox::Helpers::AST::Expression::Variable
           name = expr.name
           return Lox::Helpers::AST::Expression::Assign.new(name:, value:)
+        elsif expr.is_a? Lox::Helpers::AST::Expression::Get
+          return Lox::Helpers::AST::Expression::Set.new(object: expr.object, name: expr.name, value:)
         end
 
         error equals, 'Invalid assignment target.'
@@ -348,12 +366,17 @@ class Lox
       end
     end
 
-    def function_call
+    def function_call # rubocop:disable Metrics/MethodLength
       expr = primary
       loop do
-        break unless matches? :left_paren
-
-        expr = finish_call expr
+        if matches? :left_paren
+          expr = finish_call expr
+        elsif matches? :dot
+          name = consume :identifier, "Expect property name after '.'."
+          expr = Lox::Helpers::AST::Expression::Get.new(object: expr, name:)
+        else
+          break
+        end
       end
       expr
     end
@@ -384,6 +407,8 @@ class Lox
         Lox::Helpers::AST::Expression::Literal.new(value: previous.literal)
       elsif matches? :break
         raise error(previous, "Invalid 'break' not in loop.")
+      elsif matches? :this
+        Lox::Helpers::AST::Expression::This.new(keyword: previous)
       elsif matches? :identifier
         Lox::Helpers::AST::Expression::Variable.new(name: previous)
       elsif matches? :left_paren
