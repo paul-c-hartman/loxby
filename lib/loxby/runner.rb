@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: true
 
 class Lox
   # `Lox::Runner` is the interactive runner
@@ -12,7 +13,7 @@ class Lox
       # Exit cleanly. 130 is for interrupted scripts
       trap('INT') do
         @out.puts
-        exit Lox::Config.config.exit_code.interrupt
+        exit Lox::CONFIG[:exit_code][:interrupt]
       end
 
       @interpreter = Lox.new(out, err)
@@ -23,13 +24,13 @@ class Lox
     def run(args)
       if args.size > 1
         @out.puts 'Usage: loxby [script]'
-        exit Lox::Config.config.exit_code.usage
+        exit Lox::CONFIG[:exit_code][:usage]
       elsif args.size == 1
         @interpreter.run_file args[0]
       else
         # @interpreter.run_prompt # Run interactively
         @err.puts 'Interactive mode not yet implemented.'
-        exit Lox::Config.config.exit_code.usage
+        exit Lox::CONFIG[:exit_code][:usage]
       end
     end
   end

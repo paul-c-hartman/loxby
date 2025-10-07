@@ -1,5 +1,6 @@
 # Lox interpreter in Ruby
 # frozen_string_literal: true
+# typed: true
 
 require 'zeitwerk'
 
@@ -41,25 +42,24 @@ class Lox
     else
       report(0, '', "No such file: '#{path}'")
     end
-    exit Lox::Config.config.exit_code.syntax_error if @errored # Don't execute malformed code
-    exit Lox::Config.config.exit_code.runtime_error if @errored_in_runtime
+    exit Lox::CONFIG[:exit_code][:syntax_error] if @errored # Don't execute malformed code
+    exit Lox::CONFIG[:exit_code][:runtime_error] if @errored_in_runtime
   end
 
   # Parse and run a string
   def run(source)
-    tokens = Scanner.new(source, self).scan_tokens
-    parser = Parser.new(tokens, self)
-    statements = parser.parse
-    return if @errored
-
-    resolver = Resolver.new(@interpreter)
-
-    # No need to store output as this injects data
-    # directly into the interpreter
-    resolver.resolve statements
-    return if @errored # To prevent running code when the resolver found an error
-
-    @interpreter.interpret statements
+    steps = [
+      Lox::Scanner,
+      Lox::Parser,
+      Lox::Resolver
+    ]
+    code = source
+    steps.each do |step|
+      instance = step.new(code, self)
+      code = instance.process
+      break if @errored
+    end
+    @interpreter.interpret(code) unless @errored
   end
 
   def error(line, message)

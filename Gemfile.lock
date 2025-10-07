@@ -120,7 +120,6 @@ PLATFORMS
 
 DEPENDENCIES
   debug
-  dry-configurable (~> 1.0.0)
   loxby!
   minitest
   rake

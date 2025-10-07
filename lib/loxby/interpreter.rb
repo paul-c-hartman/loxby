@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: true
 
 class Lox
   # Interpreter class. Walks the AST using
