@@ -1,16 +1,21 @@
 # frozen_string_literal: true
-# typed: true
+# typed: strict
 
 class Lox
   # An AST `Visitor` which performs semantic
   # analysis to resolve variable
   # references in a single pass.
   class Resolver
-    def initialize(tree, interpreter)
+    extend T::Sig
+
+    sig { params(tree: T.untyped, process: Lox).void }
+    def initialize(tree, process)
       @tree = tree
-      @interpreter = interpreter
+      @process = process
+      @interpreter = T.let(process.interpreter, Lox::Interpreter)
     end
 
+    sig { returns(T.untyped) }
     def resolve; end
 
     alias process resolve

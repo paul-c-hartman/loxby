@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: true
+# typed: strict
 
 class Lox
   # `Lox::Parser` converts a list of tokens
@@ -7,12 +7,18 @@ class Lox
   # This tree can be interacted with using
   # the Visitor pattern.
   class Parser
-    def initialize(tokens, interpreter)
+    extend T::Sig
+
+    sig { params(tokens: T::Array[T.untyped], process: Lox).void }
+    def initialize(tokens, process)
       @tokens = tokens
-      @interpreter = interpreter
+      @process = process
     end
 
-    def parse; end
+    sig { returns(T::Array[T.untyped]) }
+    def parse
+      []
+    end
 
     alias process parse
   end

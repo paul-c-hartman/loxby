@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# typed: true
+# typed: strict
 
 class Lox
   # `Lox::Runner` is the interactive runner
@@ -9,28 +9,32 @@ class Lox
   # though it can be instantiated from
   # code as well.
   class Runner
+    extend T::Sig
+
+    sig { params(out: IO, err: IO).void }
     def initialize(out = $stdout, err = $stderr)
       # Exit cleanly. 130 is for interrupted scripts
       trap('INT') do
         @out.puts
-        exit Lox::CONFIG[:exit_code][:interrupt]
+        exit T.must(Lox::Config.exit_code[:interrupt])
       end
 
-      @interpreter = Lox.new(out, err)
       @out = out
       @err = err
+      @process = T.let(Lox.new(@out, @err), Lox)
     end
 
+    sig { params(args: T::Array[String]).void }
     def run(args)
       if args.size > 1
         @out.puts 'Usage: loxby [script]'
-        exit Lox::CONFIG[:exit_code][:usage]
+        exit T.must(Lox::Config.exit_code[:usage])
       elsif args.size == 1
-        @interpreter.run_file args[0]
+        @process.run_file T.must(args[0])
       else
-        # @interpreter.run_prompt # Run interactively
+        # @process.run_prompt # Run interactively
         @err.puts 'Interactive mode not yet implemented.'
-        exit Lox::CONFIG[:exit_code][:usage]
+        exit T.must(Lox::Config.exit_code[:usage])
       end
     end
   end

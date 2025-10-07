@@ -1,16 +1,20 @@
 # frozen_string_literal: true
-# typed: true
+# typed: strict
 
 class Lox
   # `Lox::Scanner` converts a string to
   # a series of tokens using a giant
   # `case` statement.
   class Scanner
-    def initialize(source, interpreter)
+    extend T::Sig
+
+    sig { params(source: String, process: Lox).void }
+    def initialize(source, process)
       @source = source
-      @interpreter = interpreter
+      @process = process
     end
 
+    sig { returns(T.untyped) }
     def scan; end
 
     alias process scan
