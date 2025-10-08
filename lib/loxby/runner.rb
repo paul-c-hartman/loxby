@@ -32,9 +32,7 @@ class Lox
       elsif args.size == 1
         @process.run_file T.must(args[0])
       else
-        # @process.run_prompt # Run interactively
-        @err.puts 'Interactive mode not yet implemented.'
-        exit T.must(Lox::Config.exit_code[:usage])
+        @process.run_prompt # Run interactively
       end
     end
   end

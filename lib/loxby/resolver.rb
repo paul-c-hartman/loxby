@@ -15,8 +15,9 @@ class Lox
       @interpreter = T.let(process.interpreter, Lox::Interpreter)
     end
 
-    sig { returns(T.untyped) }
-    def resolve; end
+    sig { params(statements: T.untyped).returns(T.untyped) }
+    def resolve(statements)
+    end
 
     alias process resolve
   end

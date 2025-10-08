@@ -58,17 +58,26 @@ class Lox
     exit T.must(Lox::Config.exit_code[:runtime_error]) if @errored_in_runtime
   end
 
+  # Interactive prompt
+  sig { void }
+  def run_prompt
+    @out.puts "Loxby #{Lox::VERSION}"
+    loop do
+      @out.print '> '
+      input = gets.chomp
+      break if input.empty?
+
+      run(input)
+      @errored = false # Reset error flag
+    end
+  end
+
   # Parse and run a string
   sig { params(source: String).void }
   def run(source)
-    steps = [Lox::Scanner, Lox::Parser, Lox::Resolver]
-    code = T.let(source, T.untyped)
-    steps.each do |step|
-      instance = step.new(code, self)
-      code = instance.process
-      break if @errored
-    end
-    @interpreter.interpret(code) unless @errored
+    scanner = Lox::Scanner.new(source, self)
+    tokens = scanner.process
+    puts tokens # For now, just print the tokens
   end
 
   sig { params(line: Integer, message: String).void }
@@ -84,13 +93,6 @@ class Lox
   end
 
   private
-
-  sig { params(err: StandardError).void }
-  def runtime_error(err)
-    @err.puts err.message
-    # @err.puts "[line #{err.token.line}]"
-    @errored_in_runtime = true
-  end
 
   sig { params(line: Integer, where: String, message: String).void }
   def report(line, where, message)

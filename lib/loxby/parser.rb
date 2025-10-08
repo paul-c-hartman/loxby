@@ -9,7 +9,7 @@ class Lox
   class Parser
     extend T::Sig
 
-    sig { params(tokens: T::Array[T.untyped], process: Lox).void }
+    sig { params(tokens: T::Array[Lox::Token], process: Lox).void }
     def initialize(tokens, process)
       @tokens = tokens
       @process = process
