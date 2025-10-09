@@ -2,20 +2,16 @@
 # typed: strict
 
 class Lox
-  class Expression
+  module Expression
     # Represents a grouping operation expression.
     # Props: expression (Expression)
     class Grouping < T::Struct
+      include Lox::Expression
       extend T::Sig
 
       prop :expression, Expression
 
-      sig { params(expression: Expression).void }
-      def initialize(expression:) # rubocop:disable Lint/UselessMethodDefinition
-        super(expression:)
-      end
-
-      sig { params(visitor: Lox::Visitor).returns(T.untyped) }
+      sig { override.params(visitor: Lox::Visitor).returns(T.untyped) }
       def accept(visitor) = visitor.visit_grouping_expr(self)
     end
   end

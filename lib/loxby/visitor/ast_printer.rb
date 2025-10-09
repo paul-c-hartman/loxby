@@ -5,12 +5,14 @@ class Lox
   module Visitor
     # A visitor that prints the AST in a parenthesized format
     # for easier debugging.
-    class ASTPrinter
+    class AstPrinter
       extend T::Sig
       include Visitor
 
       sig { params(expr: Expression).returns(String) }
-      def print(expr) = expr.accept(self)
+      def print(expr)
+        expr.accept(self)
+      end
 
       sig { override.params(expr: Expression::Binary).returns(String) }
       def visit_binary_expr(expr)
@@ -25,6 +27,11 @@ class Lox
       sig { override.params(expr: Expression::Literal).returns(String) }
       def visit_literal_expr(expr)
         expr.value.nil? ? 'nil' : expr.value.to_s
+      end
+
+      sig { override.params(expr: Expression::Ternary).returns(String) }
+      def visit_ternary_expr(expr)
+        parenthesize('?:', expr.left, expr.middle, expr.right)
       end
 
       sig { override.params(expr: Expression::Unary).returns(String) }

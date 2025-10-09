@@ -77,6 +77,10 @@ class Lox
         add_token(:semicolon)
       when '*'
         add_token(:star)
+      when '?'
+        add_token(:question)
+      when ':'
+        add_token(:colon)
       when '!'
         add_token(match('=') ? :bang_equal : :bang)
       when '='
@@ -88,7 +92,6 @@ class Lox
       when '/'
         if match('/')
           advance until end_of_input? || peek == "\n"
-          add_token(:comment)
         elsif match('*')
           # Multi-line comment
           until end_of_input? || (peek == '*' && peek_next == '/')
@@ -97,7 +100,6 @@ class Lox
           end
           advance unless end_of_input? # Consume the '*'
           advance unless end_of_input? # Consume the '/'
-          add_token(:multiline_comment)
         else
           add_token(:slash)
         end
@@ -172,7 +174,10 @@ class Lox
       end
 
       value = T.must(@source[@start...@current])
-      add_token(:number, value.to_i)
+      # T.unsafe shenanigans since Sorbet doesn't mark Kernel#Integer
+      # as returning T.nilable(Integer) with `exception: false`. This
+      # should still propagate types correctly for static checks.
+      add_token(:number, T.let(T.unsafe(Integer(value, exception: false)) || Float(value), T.any(Integer, Float)))
     end
 
     sig { returns(T::Boolean) }

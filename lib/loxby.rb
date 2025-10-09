@@ -77,19 +77,17 @@ class Lox
   def run(source)
     scanner = Lox::Scanner.new(source, self)
     tokens = scanner.process
-    puts tokens # For now, just print the tokens
+    parser = Lox::Parser.new(tokens, self)
+    expr = parser.parse
+    return if @errored
+
+    # For now, just print the syntax tree
+    puts Lox::Visitor::AstPrinter.new.print(T.must(expr))
   end
 
   sig { params(line: Integer, message: String).void }
   def error(line, message)
-    # if line.is_a? Lox::Helpers::Token
-    #   # Parse/runtime error
-    #   where = line.type == :eof ? 'end' : "'#{line.lexeme}'"
-    #   report(line.line, " at #{where}", message)
-    # else
-    # Scan error
     report(line, '', message)
-    # end
   end
 
   private
