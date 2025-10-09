@@ -8,7 +8,7 @@ class Lox
   class Scanner
     extend T::Sig
 
-    @@keywords = T.let(
+    @@keywords = T.let( # rubocop:disable Style/ClassVars
       {
         'and' => :and,
         'class' => :class,
@@ -54,7 +54,7 @@ class Lox
     private
 
     sig { void }
-    def scan_token # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength
+    def scan_token # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/AbcSize,Metrics/PerceivedComplexity
       char = advance
       case char
       when '('
