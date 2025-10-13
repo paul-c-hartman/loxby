@@ -90,6 +90,12 @@ class Lox
     report(line, '', message)
   end
 
+  sig { params(line: Integer, message: String).void }
+  def runtime_error(line, message)
+    report(line, '', message)
+    @errored_in_runtime = true
+  end
+
   private
 
   sig { params(line: Integer, where: String, message: String).void }
